@@ -9,14 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { BarChart3, Users, Target, Calendar } from "lucide-react";
-
-// Mock data
-const mockUser = {
-  name: "Sarah Chen",
-  role: "UI/UX Designer",
-  avatar: "",
-  points: 2450,
-};
+import { useAuthStore } from "@/store/authStore";
 
 const mockProjects = [
   {
@@ -137,6 +130,16 @@ const mockNotifications = [
 ];
 
 export default function SkilledMemberDashboard() {
+  const user = useAuthStore((state) => state.user);
+  console.log("SkilledMemberDashboard user:", user);
+  // Mock data
+  const mockUser = {
+    name: user.firstName || "Sarah",
+    role: user?.subRole || "UI/UX Designer",
+    avatar: "",
+    points: 2450,
+  };
+
   const [notifications, setNotifications] = useState(mockNotifications);
 
   const handleTaskComplete = (taskId: string) => {

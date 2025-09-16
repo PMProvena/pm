@@ -18,14 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "./ui/tabs";
-import { useAuthStore } from "@/store/authStore";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -43,11 +38,6 @@ export function AuthModal({
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
-  const handleLogin = (role: "SUPER_ADMIN" | "MENTOR" | "SKILLED_MEMBER") => {
-    login(role);
-    navigate("/dashboard");
-  };
-
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -64,22 +54,64 @@ export function AuthModal({
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate auth process
     setTimeout(() => {
       const mockUser = {
         id: "1",
         email: formData.email,
         firstName: formData.firstName || "User",
         lastName: formData.lastName || "Demo",
-        role: formData.role || "pm",
+        role:
+          formData.role === "Designer" ||
+          formData.role === "Frontend Developer" ||
+          formData.role === "Backend Developer" ||
+          formData.role === "Mobile Developer"
+            ? "SKILLED_MEMBER"
+            : (formData.role as
+                | "SUPER_ADMIN"
+                | "MENTOR"
+                | "SKILLED_MEMBER"
+                | "pm") || "pm",
+        subRole: formData.role,
         hasCompletedOnboarding: activeTab === "login",
       };
 
-      onAuthSuccess(mockUser);
+      if (mockUser.role === "pm") {
+        onAuthSuccess(mockUser);
+        setIsLoading(false);
+        onClose();
+        // navigate("/dashboard"); // where your PM flow already kicks in
+        return;
+      }
+
+      // ✅ For other roles, store role in Zustand
+
+      login(mockUser);
       setIsLoading(false);
       onClose();
+      navigate("/dashboard");
     }, 1500);
   };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+
+  //   // Simulate auth process
+  //   setTimeout(() => {
+  //     const mockUser = {
+  //       id: "1",
+  //       email: formData.email,
+  //       firstName: formData.firstName || "User",
+  //       lastName: formData.lastName || "Demo",
+  //       role: formData.role || "pm",
+  //       hasCompletedOnboarding: activeTab === "login",
+  //     };
+
+  //     onAuthSuccess(mockUser);
+  //     setIsLoading(false);
+  //     onClose();
+  //   }, 1500);
+  // };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -87,7 +119,7 @@ export function AuthModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md h-[95vh] overflow-y-scroll">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
             <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
@@ -112,53 +144,6 @@ export function AuthModal({
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
-
-          {/* <TabsContent value="login" className="space-y-4 mt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="pl-10"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    className="pl-10"
-                    value={formData.password}
-                    onChange={(e) =>
-                      handleInputChange("password", e.target.value)
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing In..." : "Sign In"}
-              </Button>
-
-              <div className="text-center">
-                <Button variant="link" className="text-sm">
-                  Forgot password?
-                </Button>
-              </div>
-            </form>
-          </TabsContent> */}
 
           <TabsContent value="login" className="space-y-4 mt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,7 +180,6 @@ export function AuthModal({
                 </div>
               </div>
 
-              {/* Role Selection for Testing */}
               <div className="space-y-2">
                 <Label htmlFor="role">Login as Role</Label>
                 <Select
@@ -206,6 +190,9 @@ export function AuthModal({
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="pm">
+                      Product Manager (Aspiring)
+                    </SelectItem>
                     <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                     <SelectItem value="MENTOR">Mentor</SelectItem>
                     <SelectItem value="SKILLED_MEMBER">
@@ -215,14 +202,15 @@ export function AuthModal({
                 </Select>
               </div>
 
-              <Button
-                type="button"
-                className="w-full"
-                disabled={isLoading || !formData.role}
-                onClick={() => handleLogin(formData.role as any)}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
+
+              <div className="text-center">
+                <Button variant="link" className="text-sm">
+                  Forgot password?
+                </Button>
+              </div>
             </form>
           </TabsContent>
 
@@ -284,15 +272,17 @@ export function AuthModal({
                     <SelectItem value="pm">
                       Product Manager (Aspiring)
                     </SelectItem>
-                    <SelectItem value="designer">UI/UX Designer</SelectItem>
-                    <SelectItem value="frontend">Frontend Developer</SelectItem>
-                    <SelectItem value="backend">Backend Developer</SelectItem>
-                    <SelectItem value="mobile">Mobile Developer</SelectItem>
-                    <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
-                    <SelectItem value="MENTOR">Mentor</SelectItem>
-                    <SelectItem value="SKILLED_MEMBER">
-                      Skilled Member
+                    <SelectItem value="Designer">UI/UX Designer</SelectItem>
+                    <SelectItem value="Frontend Developer">
+                      Frontend Developer
                     </SelectItem>
+                    <SelectItem value="Backend Developer">
+                      Backend Developer
+                    </SelectItem>
+                    <SelectItem value="Mobile Developer">
+                      Mobile Developer
+                    </SelectItem>
+                    <SelectItem value="MENTOR">Mentor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -356,13 +346,8 @@ export function AuthModal({
                 </div>
               </div>
 
-              <Button
-                type="button"
-                className="w-full"
-                disabled={isLoading}
-                onClick={() => handleLogin(formData.role as any)}
-              >
-                {isLoading ? "Signing In..." : "Sign In"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">
