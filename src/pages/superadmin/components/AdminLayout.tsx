@@ -48,7 +48,7 @@ export function AdminLayout({
       <div className="w-64 bg-card border-r border-border">
         <div className="p-6">
           <h1 className="text-xl font-semibold text-foreground">
-            PM Experience
+            Provena
           </h1>
           <p className="text-sm text-muted-foreground">Super Admin</p>
         </div>

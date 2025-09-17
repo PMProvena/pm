@@ -305,7 +305,7 @@ export function ProjectSelection({ onProjectSelect, onBack }: ProjectSelectionPr
           </Button>
           <h1 className="text-3xl mb-2">Choose Your Project</h1>
           <p className="text-muted-foreground">
-            Select an industry-specific project to start building real-world PM experience
+            Select an industry-specific project to start building real-world Provena
           </p>
         </div>
 

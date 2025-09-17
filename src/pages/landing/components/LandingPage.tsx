@@ -3,6 +3,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import img1 from "../../../assets/img-1.png";
 
 interface LandingPageProps {
   onAuthClick: (type: 'login' | 'signup') => void;
@@ -40,7 +41,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
     {
       name: "Sarah Chen",
       role: "Product Manager at TechCorp",
-      content: "PM Experience gave me the real-world experience I needed to land my first PM role. The mentorship was invaluable!",
+      content: "Provena gave me the real-world experience I needed to land my first PM role. The mentorship was invaluable!",
       rating: 5
     },
     {
@@ -67,7 +68,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
                 <Target className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-semibold">PM Experience</span>
+              <span className="text-xl font-semibold">Provena</span>
             </div>
             <div className="space-x-4">
               <Button variant="ghost" onClick={() => onAuthClick('login')}>
@@ -88,7 +89,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             Bridge the Experience Gap
           </Badge>
           <h1 className="text-4xl md:text-6xl mb-6 max-w-4xl mx-auto">
-            Land Your Dream PM Job with Real-World Experience
+            Land Your Dream PM Job with <span className="text-[#1ccefc]">Real-World Experience</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join cross-functional teams, work on industry projects, get expert mentorship, 
@@ -163,7 +164,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
           </div>
           <div className="relative max-w-3xl mx-auto">
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1558092535-648ec3c50158?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9kdWN0JTIwbWFuYWdlbWVudCUyMGRhc2hib2FyZHxlbnwxfHx8fDE3NTc2ODUzMzV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+              src={img1}
               alt="Product management dashboard"
               className="rounded-lg shadow-xl w-full h-auto"
             />
@@ -179,7 +180,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               How It Works
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              A simple 4-step process to gain real PM experience
+              A simple 4-step process to gain real Provena
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -225,7 +226,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               Success Stories
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See how PM Experience helped land dream PM roles
+              See how Provena helped land dream PM roles
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -244,7 +245,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
                 <CardContent>
                   <div>
                     <CardTitle className="text-sm">{testimonial.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    {/* <p className="text-sm text-muted-foreground">{testimonial.role}</p> */}
                   </div>
                 </CardContent>
               </Card>
@@ -266,7 +267,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             <Button size="lg" variant="secondary" onClick={() => onAuthClick('signup')}>
               Get Started Now
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button size="lg" variant="outline" className="bg-[#1ccefc] border-[#1ccefc] text-primary-foreground hover:bg-primary-foreground hover:text-[#1ccefc]">
               Learn More
             </Button>
           </div>
@@ -281,10 +282,10 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
                 <Target className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg">PM Experience</span>
+              <span className="text-lg">Provena</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2025 PM Experience. All rights reserved.
+              © 2025 Provena. All rights reserved.
             </div>
           </div>
         </div>
