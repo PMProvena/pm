@@ -56,10 +56,10 @@ export default function HomePage() {
     }
   };
 
-  const handleProjectSelect = (project: Project) => {
-    setSelectedProject(project);
-    setCurrentState('payment');
-  };
+  // const handleProjectSelect = (project: Project) => {
+  //   setSelectedProject(project);
+  //   setCurrentState('payment');
+  // };
 
   const handlePaymentSuccess = () => {
     setCurrentState('dashboard');
@@ -74,9 +74,9 @@ export default function HomePage() {
     setSelectedProject(null);
   };
 
-  const handleBackToDashboard = () => {
-    setCurrentState('dashboard');
-  };
+  // const handleBackToDashboard = () => {
+  //   setCurrentState('dashboard');
+  // };
 
   // Render current state
   if (currentState === 'landing') {
@@ -96,8 +96,8 @@ export default function HomePage() {
   if (currentState === 'project-selection') {
     return (
       <ProjectSelection
-        onProjectSelect={handleProjectSelect}
-        onBack={handleBackToDashboard}
+        // onProjectSelect={handleProjectSelect}
+        // onBack={handleBackToDashboard}
       />
     );
   }
@@ -115,9 +115,9 @@ export default function HomePage() {
   if (currentState === 'dashboard' && user) {
     return (
       <Dashboard
-        user={user}
-        currentProject={selectedProject}
-        onStartNewProject={() => setCurrentState('project-selection')}
+        // user={user}
+        // currentProject={selectedProject}
+        // onStartNewProject={() => setCurrentState('project-selection')}
       />
     );
   }
