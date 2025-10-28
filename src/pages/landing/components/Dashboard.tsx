@@ -1,3 +1,6 @@
+import type { DashboardProps } from "@/api/interfaces/dashboard";
+import type { Project } from "@/api/interfaces/projects";
+import { useGetDashboard } from "@/hooks/projects/useGetDashboard";
 import {
   Award,
   Bell,
@@ -12,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ProjectDashboard } from "./ProjectDashboard";
 import { TeamFormation } from "./TeamFormation";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -27,34 +31,11 @@ import {
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  hasCompletedOnboarding: boolean;
-}
-
-// interface Project {
-//   id: string;
-//   title: string;
-//   industry: string;
-//   description: string;
-//   duration: string;
-//   price: number;
-//   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-//   skills: string[];
-//   milestones: number;
-//   teamSize: number;
-//   icon: React.ReactNode;
-//   objectives: string[];
-// }
-
-const currentProject = {
+const currentProject: Project = {
   id: "12345",
+  _id: "12345", // ✅ added
   title: "AI-Powered Customer Support Chatbot",
   industry: "Technology",
   description:
@@ -63,11 +44,16 @@ const currentProject = {
   price: 1500,
   difficulty: "Intermediate",
   skills: [
-    "React",
-    "Node.js",
-    "Natural Language Processing",
-    "Express.js",
-    "MongoDB",
+    "UI/UX Designer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Mobile Developer",
+  ],
+  requiredSkills: [
+    "UI/UX Designer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Mobile Developer",
   ],
   milestones: 5,
   teamSize: 4,
@@ -85,62 +71,39 @@ const currentProject = {
   ],
 };
 
-interface DashboardProps {
-  user?: User;
-  // currentProject: Project | null;
-  // onStartNewProject: () => void;
-}
-
 export function Dashboard({ user }: DashboardProps) {
+  console.log("user", user);
   // export function Dashboard({ user, currentProject, onStartNewProject }: DashboardProps) {
   const nav = useNavigate();
+
+  const { data, isPending, isError } = useGetDashboard();
+
+  console.log("Dashboard data:", data);
+
   const [activeTab, setActiveTab] = useState("overview");
   const [projectPhase, setProjectPhase] = useState<
     "team-formation" | "active" | "completed"
   >("team-formation");
 
-  // Mock data for demonstration
+  // Replace your old mock stats with this
   const stats = {
-    totalProjects: 1,
-    completedMilestones: 0,
-    totalMilestones: 0,
-    points: 0,
-    certificatesEarned: 0,
+    totalProjects: data?.projects ?? "---",
+    completedMilestones: data?.milestones?.completed ?? "---",
+    totalMilestones: data?.milestones?.total ?? "---",
+    points: data?.points ?? "---",
+    certificatesEarned: data?.certificates ?? "---",
+    profileCompletion: data?.profileCompletion ?? "---",
+    pointsPeriod: data?.pointsEarned?.period ?? "---",
+    pointsValue: data?.pointsEarned?.value ?? "---",
+    activeProjects: data?.activeProjects ?? "---",
   };
 
-  const notifications = [
-    {
-      id: "1",
-      type: "team",
-      message: "Your team formation is pending approval",
-      time: "2 hours ago",
-      unread: true,
-    },
-    {
-      id: "2",
-      type: "mentor",
-      message: "Welcome to PM Experience! Your mentor will be assigned soon.",
-      time: "1 day ago",
-      unread: true,
-    },
-  ];
+  // Same with these
+  const notifications = data?.notifications?.length ? data.notifications : [];
 
-  const recentActivity = [
-    {
-      id: "1",
-      action: "Project Started",
-      description: "No active project",
-      time: "2 hours ago",
-      type: "project",
-    },
-    {
-      id: "2",
-      action: "Account Created",
-      description: "Welcome to PM Experience!",
-      time: "1 day ago",
-      type: "account",
-    },
-  ];
+  const recentActivity = data?.recentActivity?.length
+    ? data.recentActivity
+    : [];
 
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -158,6 +121,9 @@ export function Dashboard({ user }: DashboardProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (isPending) return <p>Loading dashboard...</p>;
+  if (isError) return <p>Failed to load dashboard.</p>;
 
   if (activeTab === "project") {
     if (projectPhase === "team-formation") {
@@ -191,6 +157,11 @@ export function Dashboard({ user }: DashboardProps) {
                 <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
                   <Target className="h-5 w-5 text-primary-foreground" />
                 </div>
+                {/* <img
+                  src="/pngs/logo.png"
+                  alt="logo"
+                  className="w-20 h-20 object-contain"
+                /> */}
                 <span className="text-xl font-semibold">PM Experience</span>
               </div>
               <Separator orientation="vertical" className="h-6" />
@@ -202,7 +173,11 @@ export function Dashboard({ user }: DashboardProps) {
               ref={dropdownRef}
             >
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative cursor-pointer">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative cursor-pointer"
+              >
                 <Bell className="h-5 w-5" />
                 {notifications.some((n) => n.unread) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full"></div>
@@ -225,7 +200,9 @@ export function Dashboard({ user }: DashboardProps) {
                     <button
                       onClick={() => {
                         setShowDropdown(false);
+                        localStorage.removeItem("userDetails");
                         nav("/");
+                        toast.success("Logged out successfully!");
                       }}
                       className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                     >
@@ -237,7 +214,13 @@ export function Dashboard({ user }: DashboardProps) {
 
               {/* Avatar */}
               <Avatar>
-                <AvatarFallback>PO</AvatarFallback>
+                <AvatarFallback>
+                  {user
+                    ? `${user.firstName?.[0] ?? ""}${
+                        user.lastName?.[0] ?? ""
+                      }`.toUpperCase()
+                    : "U"}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -252,11 +235,21 @@ export function Dashboard({ user }: DashboardProps) {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarFallback className="text-lg">P 0</AvatarFallback>
+                    <AvatarFallback className="text-lg">
+                      {user
+                        ? `${user.firstName?.[0] ?? ""}${
+                            user.lastName?.[0] ?? ""
+                          }`.toUpperCase()
+                        : "U"}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-lg">Pelz Ola</CardTitle>
-                    <CardDescription className="capitalize">PM</CardDescription>
+                    <CardTitle className="text-lg">
+                      {user ? `${user.firstName} ${user.lastName}` : "Guest"}
+                    </CardTitle>
+                    <CardDescription className="capitalize">
+                      {user?.role ?? "—"}
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -264,9 +257,9 @@ export function Dashboard({ user }: DashboardProps) {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Profile Completion</span>
-                    <span>85%</span>
+                    <span>{stats.profileCompletion}%</span>
                   </div>
-                  <Progress value={85} className="h-2" />
+                  <Progress value={stats.profileCompletion} className="h-2" />
                 </div>
                 <Separator />
                 <div className="space-y-3">
@@ -299,18 +292,24 @@ export function Dashboard({ user }: DashboardProps) {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
-                  className="w-full justify-start"
+                  className="w-full justify-start cursor-pointer"
                   variant="outline"
-                  // onClick={onStartNewProject}
+                  onClick={() => nav("/projects")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Start New Project
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button
+                  className="w-full justify-start cursor-pointer"
+                  variant="outline"
+                >
                   <BookOpen className="h-4 w-4 mr-2" />
                   View Portfolio
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button
+                  className="w-full justify-start cursor-pointer"
+                  variant="outline"
+                >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Message Mentor
                 </Button>
@@ -436,7 +435,7 @@ export function Dashboard({ user }: DashboardProps) {
                         Choose from our curated selection of real-world projects
                         to begin building your product management experience.
                       </p>
-                      <Button 
+                      <Button
                       // onClick={onStartNewProject}
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -455,23 +454,29 @@ export function Dashboard({ user }: DashboardProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {recentActivity.map((activity) => (
-                        <div
-                          key={activity.id}
-                          className="flex items-start space-x-3"
-                        >
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                          <div className="flex-1">
-                            <p className="text-sm">{activity.action}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {activity.description}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {activity.time}
-                            </p>
+                      {recentActivity?.length > 0 ? (
+                        recentActivity.map((activity) => (
+                          <div
+                            key={activity.id}
+                            className="flex items-start space-x-3"
+                          >
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <div className="flex-1">
+                              <p className="text-sm">{activity.action}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {activity.description}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {activity.time}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No recent activity
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -480,24 +485,30 @@ export function Dashboard({ user }: DashboardProps) {
                       <CardTitle className="text-base">Notifications</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className="flex items-start space-x-3"
-                        >
+                      {notifications?.length > 0 ? (
+                        notifications.map((notification) => (
                           <div
-                            className={`w-2 h-2 rounded-full mt-2 ${
-                              notification.unread ? "bg-primary" : "bg-muted"
-                            }`}
-                          ></div>
-                          <div className="flex-1">
-                            <p className="text-sm">{notification.message}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {notification.time}
-                            </p>
+                            key={notification.id}
+                            className="flex items-start space-x-3"
+                          >
+                            <div
+                              className={`w-2 h-2 rounded-full mt-2 ${
+                                notification.unread ? "bg-primary" : "bg-muted"
+                              }`}
+                            ></div>
+                            <div className="flex-1">
+                              <p className="text-sm">{notification.message}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {notification.time}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No notifications
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 </div>

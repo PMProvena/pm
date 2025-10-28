@@ -1,7 +1,10 @@
+import type { Project, ProjectSelectionProps } from "@/api/interfaces/projects";
+import { PayButton } from "@/components/PayButton";
+import { useGetProjects } from "@/hooks/projects/useGetProjects";
 import {
   Clock,
   CreditCard,
-  DollarSign,
+  // DollarSign,
   GraduationCap,
   Heart,
   ShoppingCart,
@@ -9,7 +12,8 @@ import {
   Target,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -20,182 +24,64 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Progress } from "./ui/progress";
-import { useNavigate } from "react-router-dom";
 
-interface Project {
-  id: string;
-  title: string;
-  industry: string;
-  description: string;
-  duration: string;
-  price: number;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  skills: string[];
-  milestones: number;
-  teamSize: number;
-  icon: React.ReactNode;
-  objectives: string[];
-}
-
-// interface ProjectSelectionProps {
-//   onProjectSelect: (project: Project) => void;
-//   onBack: () => void;
-// }
-
-export function ProjectSelection() {
-  // export function ProjectSelection({ onProjectSelect, onBack }: ProjectSelectionProps) {
+export function ProjectSelection({ user }: ProjectSelectionProps) {
+  console.log("user", user);
   const nav = useNavigate();
+
+  const {
+    data: allProjects,
+    isPending,
+    isError,
+  } = useGetProjects() as {
+    data?: { projects: Project[] };
+    isPending: boolean;
+    isError: boolean;
+  };
+
+  console.log("allProjects", allProjects);
+
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  console.log("selectedProject", selectedProject);
 
-  const projects: Project[] = [
-    {
-      id: "ecommerce-mobile",
-      title: "Mobile Commerce App Redesign",
-      industry: "E-commerce",
-      description:
-        "Lead the redesign of a mobile commerce app to improve conversion rates and user experience.",
-      duration: "6 weeks",
-      price: 299,
-      difficulty: "Intermediate",
-      skills: ["UI/UX Designer", "Mobile Developer", "Backend Developer"],
-      milestones: 6,
-      teamSize: 4,
-      icon: <ShoppingCart className="h-6 w-6" />,
-      objectives: [
-        "Conduct user research and competitive analysis",
-        "Design improved user flows and wireframes",
-        "Implement A/B testing for key features",
-        "Optimize checkout process for mobile",
-        "Integrate analytics and tracking",
-      ],
-    },
-    {
-      id: "fintech-dashboard",
-      title: "Personal Finance Dashboard",
-      industry: "FinTech",
-      description:
-        "Build a comprehensive personal finance management platform with budgeting and investment tracking.",
-      duration: "8 weeks",
-      price: 399,
-      difficulty: "Advanced",
-      skills: ["UI/UX Designer", "Frontend Developer", "Backend Developer"],
-      milestones: 8,
-      teamSize: 4,
-      icon: <CreditCard className="h-6 w-6" />,
-      objectives: [
-        "Design secure authentication system",
-        "Build budget tracking and categorization",
-        "Implement investment portfolio tracking",
-        "Create financial insights and reporting",
-        "Ensure regulatory compliance",
-      ],
-    },
-    {
-      id: "healthtech-app",
-      title: "Telemedicine Platform",
-      industry: "HealthTech",
-      description:
-        "Develop a telemedicine platform connecting patients with healthcare providers.",
-      duration: "8 weeks",
-      price: 449,
-      difficulty: "Advanced",
-      skills: [
-        "UI/UX Designer",
-        "Frontend Developer",
-        "Backend Developer",
-        "Mobile Developer",
-      ],
-      milestones: 8,
-      teamSize: 5,
-      icon: <Heart className="h-6 w-6" />,
-      objectives: [
-        "Design HIPAA-compliant user flows",
-        "Build video consultation features",
-        "Implement appointment scheduling",
-        "Create patient records management",
-        "Integrate payment processing",
-      ],
-    },
-    {
-      id: "edtech-platform",
-      title: "Online Learning Platform",
-      industry: "EdTech",
-      description:
-        "Create an interactive online learning platform with progress tracking and assessments.",
-      duration: "6 weeks",
-      price: 349,
-      difficulty: "Intermediate",
-      skills: ["UI/UX Designer", "Frontend Developer", "Backend Developer"],
-      milestones: 6,
-      teamSize: 4,
-      icon: <GraduationCap className="h-6 w-6" />,
-      objectives: [
-        "Design engaging course interfaces",
-        "Build progress tracking system",
-        "Implement interactive assessments",
-        "Create instructor dashboard",
-        "Add social learning features",
-      ],
-    },
-    {
-      id: "saas-analytics",
-      title: "SaaS Analytics Dashboard",
-      industry: "SaaS",
-      description:
-        "Build a comprehensive analytics dashboard for SaaS businesses to track key metrics.",
-      duration: "4 weeks",
-      price: 249,
-      difficulty: "Beginner",
-      skills: ["UI/UX Designer", "Frontend Developer"],
-      milestones: 4,
-      teamSize: 3,
-      icon: <Target className="h-6 w-6" />,
-      objectives: [
-        "Design intuitive data visualization",
-        "Build customizable dashboard widgets",
-        "Implement real-time data updates",
-        "Create automated reporting",
-        "Add team collaboration features",
-      ],
-    },
-    {
-      id: "mobile-fitness",
-      title: "Fitness Tracking Mobile App",
-      industry: "Mobile Apps",
-      description:
-        "Develop a comprehensive fitness tracking app with social features and coaching.",
-      duration: "6 weeks",
-      price: 329,
-      difficulty: "Intermediate",
-      skills: ["UI/UX Designer", "Mobile Developer", "Backend Developer"],
-      milestones: 6,
-      teamSize: 4,
-      icon: <Smartphone className="h-6 w-6" />,
-      objectives: [
-        "Design motivating workout interfaces",
-        "Build social sharing features",
-        "Implement progress tracking",
-        "Create personalized coaching",
-        "Integrate wearable devices",
-      ],
-    },
-  ];
+  // const projects = allProjects?.projects || [];
 
-  const industries = [
-    "all",
-    "E-commerce",
-    "FinTech",
-    "HealthTech",
-    "EdTech",
-    "SaaS",
-    "Mobile Apps",
-  ];
+  const { projects } = useMemo(() => {
+    return { projects: allProjects?.projects || [] };
+  }, [allProjects]);
 
-  const filteredProjects =
-    selectedIndustry === "all"
-      ? projects
-      : projects.filter((project) => project.industry === selectedIndustry);
+  // map icons dynamically by industry
+  const getIcon = (industry: string) => {
+    switch (industry.toLowerCase()) {
+      case "e-commerce":
+        return <ShoppingCart className="h-6 w-6" />;
+      case "fintech":
+        return <CreditCard className="h-6 w-6" />;
+      case "healthtech":
+        return <Heart className="h-6 w-6" />;
+      case "edtech":
+        return <GraduationCap className="h-6 w-6" />;
+      case "saas":
+        return <Target className="h-6 w-6" />;
+      case "mobile apps":
+        return <Smartphone className="h-6 w-6" />;
+      default:
+        return <Users className="h-6 w-6" />;
+    }
+  };
+
+  const industries = useMemo(() => {
+    const uniqueIndustries = Array.from(
+      new Set(projects.map((p) => p.industry))
+    );
+    return ["all", ...uniqueIndustries];
+  }, [projects]);
+
+  const filteredProjects = useMemo(() => {
+    if (selectedIndustry === "all") return projects;
+    return projects.filter((project) => project.industry === selectedIndustry);
+  }, [projects, selectedIndustry]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -214,6 +100,9 @@ export function ProjectSelection() {
     nav("/dashboard");
   };
 
+  if (isPending) return <p>Loading projects...</p>;
+  if (isError) return <p>Failed to load projects.</p>;
+
   if (selectedProject) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -221,18 +110,19 @@ export function ProjectSelection() {
           <Button
             variant="ghost"
             onClick={() => setSelectedProject(null)}
-            className="mb-6"
+            className="mb-6 cursor-pointer"
           >
             ← Back to Projects
           </Button>
 
           <div className="grid lg:grid-cols-3 gap-8">
+            {/* Project Info */}
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="p-2 bg-primary/10 rounded-lg">
-                      {selectedProject.icon}
+                      {getIcon(selectedProject.industry)}
                     </div>
                     <div>
                       <CardTitle className="text-2xl">
@@ -247,6 +137,7 @@ export function ProjectSelection() {
                     {selectedProject.description}
                   </p>
                 </CardHeader>
+
                 <CardContent className="space-y-6">
                   <div>
                     <h3 className="text-lg mb-3">Project Objectives</h3>
@@ -261,9 +152,9 @@ export function ProjectSelection() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg mb-3">Required Team Skills</h3>
+                    <h3 className="text-lg mb-3">Required Skills</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedProject.skills.map((skill, index) => (
+                      {selectedProject.requiredSkills.map((skill, index) => (
                         <Badge key={index} variant="outline">
                           {skill}
                         </Badge>
@@ -291,6 +182,7 @@ export function ProjectSelection() {
               </Card>
             </div>
 
+            {/* Sidebar Info */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -350,17 +242,27 @@ export function ProjectSelection() {
                 <CardContent>
                   <div className="text-center space-y-4">
                     <div>
-                      <span className="text-3xl">${selectedProject.price}</span>
+                      <span className="text-3xl">₦{selectedProject.price}</span>
                       <span className="text-muted-foreground">/ project</span>
                     </div>
-                    <Button
-                      className="w-full"
-                      size="lg"
-                      // onClick={() => onProjectSelect(selectedProject)}
-                    >
+                    {/* <Button className="w-full cursor-pointer" size="lg">
                       <DollarSign className="h-4 w-4 mr-2" />
                       Start This Project
-                    </Button>
+                    </Button> */}
+                    {user && selectedProject && (
+                      <PayButton
+                        email={user.email}
+                        amount={selectedProject.price}
+                        projectId={selectedProject._id}
+                        userId={user._id}
+                      >
+                        {/* <DollarSign className="h-4 w-4 mr-2" /> */}
+                        {/* ₦  */}
+                        Start
+                        This Project
+                      </PayButton>
+                    )}
+
                     <p className="text-xs text-muted-foreground">
                       Includes mentorship, team access, and certification
                     </p>
@@ -401,7 +303,7 @@ export function ProjectSelection() {
                 key={industry}
                 variant={selectedIndustry === industry ? "default" : "outline"}
                 onClick={() => setSelectedIndustry(industry)}
-                className="capitalize"
+                className="capitalize cursor-pointer"
               >
                 {industry === "all" ? "All Industries" : industry}
               </Button>
@@ -413,18 +315,19 @@ export function ProjectSelection() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <Card
-              key={project.id}
+              key={project._id}
               className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedProject(project)}
             >
               <CardHeader>
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    {project.icon}
+                    {getIcon(project.industry)}
                   </div>
                   <Badge variant="secondary">{project.industry}</Badge>
                 </div>
                 <CardTitle className="text-lg">{project.title}</CardTitle>
-                <CardDescription className="text-sm line-clamp-2">
+                <CardDescription className="text-sm line-clamp-1">
                   {project.description}
                 </CardDescription>
               </CardHeader>
@@ -444,36 +347,35 @@ export function ProjectSelection() {
                   <Badge className={getDifficultyColor(project.difficulty)}>
                     {project.difficulty}
                   </Badge>
-                  <span className="text-lg">${project.price}</span>
+                  <span className="text-lg">₦{project.price}</span>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-1">
-                    {project.skills.slice(0, 2).map((skill, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                    {project.skills.length > 2 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{project.skills.length - 2} more
-                      </Badge>
-                    )}
-                  </div>
+                <div className="flex flex-wrap gap-1">
+                  {project.requiredSkills?.slice(0, 2).map((skill, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {skill}
+                    </Badge>
+                  ))}
+                  {project.requiredSkills?.length > 2 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{project.requiredSkills.length - 2} more
+                    </Badge>
+                  )}
                 </div>
 
                 <Button
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   onClick={() => setSelectedProject(project)}
                 >
-                  View Details
+                  {" "}
+                  View Details{" "}
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {filteredProjects.length === 0 && (
+        {!filteredProjects.length && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               No projects found for the selected industry.

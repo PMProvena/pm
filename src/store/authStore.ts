@@ -3,15 +3,6 @@ import { create } from "zustand";
 
 type Role = "SUPER_ADMIN" | "MENTOR" | "SKILLED_MEMBER" | "PM" | "GUEST";
 
-// interface User {
-//   id: string;
-//   email: string;
-//   firstName: string;
-//   lastName: string;
-//   role: Role;
-//   subRole?: string;
-//   hasCompletedOnboarding?: boolean;
-// }
 
 interface AuthState {
   isAuthenticated: boolean;

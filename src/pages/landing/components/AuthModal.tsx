@@ -21,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useLogin, useRegister } from "@/hooks/auth/useAuth";
 // import { useAuthStore } from "@/store/authStore";
 
 interface AuthModalProps {
@@ -38,9 +39,11 @@ export function AuthModal({
 AuthModalProps) {
   // const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
 
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -70,31 +73,49 @@ AuthModalProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // ✅ Simplified using your hooks (no try/catch, no manual setIsLoading)
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // If user is on signup tab, check that passwords match
-    if (
-      activeTab === "signup" &&
-      formData.password !== formData.confirmPassword
-    ) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      onClose();
-
-      if (activeTab === "login") {
-        navigate("/dashboard"); // ✅ Sign In → Dashboard
-      } else {
-        navigate("/projects"); // ✅ Sign Up → Projects
+    if (activeTab === "signup") {
+      if (formData.password !== formData.confirmPassword) {
+        return toast.error("Passwords do not match!");
       }
-    }, 1500);
+      registerMutation.mutate(
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          experienceLevel: formData.experience,
+        },
+        {
+          onSuccess: () => {
+            onClose();
+            navigate("/projects");
+          },
+        }
+      );
+    } else {
+      loginMutation.mutate(
+        {
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          onSuccess: (response) => {
+            // Save user info and token in localStorage
+            localStorage.setItem("userDetails", JSON.stringify(response));
+
+            onClose();
+            navigate("/dashboard");
+          },
+        }
+      );
+    }
   };
+
+  const isLoading = loginMutation.isPending || registerMutation.isPending;
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();

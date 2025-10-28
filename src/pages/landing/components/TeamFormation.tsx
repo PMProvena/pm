@@ -53,6 +53,9 @@ interface TeamFormationProps {
 }
 
 export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormationProps) {
+
+  console.log("current project", project)
+
   const [selectedMembers, setSelectedMembers] = useState<{[key: string]: TeamMember}>({});
   const [showRemovalDialog, setShowRemovalDialog] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{role: string, member: TeamMember} | null>(null);
