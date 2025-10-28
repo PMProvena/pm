@@ -190,7 +190,7 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
       setShowRemovalDialog(false);
       setMemberToRemove(null);
       setRemovalReason('');
-      // In a real app, this would send the removal request to super admin
+
     }
   };
 
