@@ -24,6 +24,8 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Progress } from "./ui/progress";
+import Error from "./error/Error";
+import ProjectsSkeletonLoader from "./loader/ProjectsSkeletonLoader";
 
 export function ProjectSelection({ user }: ProjectSelectionProps) {
   console.log("user", user);
@@ -33,19 +35,16 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
     data: allProjects,
     isPending,
     isError,
+    refetch: refetchProjects,
   } = useGetProjects() as {
     data?: { projects: Project[] };
     isPending: boolean;
     isError: boolean;
+    refetch: () => void;
   };
-
-  console.log("allProjects", allProjects);
 
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  console.log("selectedProject", selectedProject);
-
-  // const projects = allProjects?.projects || [];
 
   const { projects } = useMemo(() => {
     return { projects: allProjects?.projects || [] };
@@ -100,8 +99,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
     nav("/dashboard");
   };
 
-  if (isPending) return <p>Loading projects...</p>;
-  if (isError) return <p>Failed to load projects.</p>;
+  if (isError) return <Error refetchData={refetchProjects} />;
 
   if (selectedProject) {
     return (
@@ -258,8 +256,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                       >
                         {/* <DollarSign className="h-4 w-4 mr-2" /> */}
                         {/* ₦  */}
-                        Start
-                        This Project
+                        Start This Project
                       </PayButton>
                     )}
 
@@ -294,86 +291,100 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
           </p>
         </div>
 
-        {/* Industry Filter */}
-        <div className="mb-8">
-          <h3 className="text-lg mb-4">Filter by Industry</h3>
-          <div className="flex flex-wrap gap-2">
-            {industries.map((industry) => (
-              <Button
-                key={industry}
-                variant={selectedIndustry === industry ? "default" : "outline"}
-                onClick={() => setSelectedIndustry(industry)}
-                className="capitalize cursor-pointer"
-              >
-                {industry === "all" ? "All Industries" : industry}
-              </Button>
-            ))}
-          </div>
-        </div>
+        {isPending ? (
+          <ProjectsSkeletonLoader />
+        ) : (
+          <>
+            {/* Industry Filter */}
+            <div className="mb-8">
+              <h3 className="text-lg mb-4">Filter by Industry</h3>
+              <div className="flex flex-wrap gap-2">
+                {industries.map((industry) => (
+                  <Button
+                    key={industry}
+                    variant={
+                      selectedIndustry === industry ? "default" : "outline"
+                    }
+                    onClick={() => setSelectedIndustry(industry)}
+                    className="capitalize cursor-pointer"
+                  >
+                    {industry === "all" ? "All Industries" : industry}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
-        {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <Card
-              key={project._id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setSelectedProject(project)}
-            >
-              <CardHeader>
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    {getIcon(project.industry)}
-                  </div>
-                  <Badge variant="secondary">{project.industry}</Badge>
-                </div>
-                <CardTitle className="text-lg">{project.title}</CardTitle>
-                <CardDescription className="text-sm line-clamp-1">
-                  {project.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{project.duration}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Users className="h-4 w-4" />
-                    <span>{project.teamSize}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Badge className={getDifficultyColor(project.difficulty)}>
-                    {project.difficulty}
-                  </Badge>
-                  <span className="text-lg">₦{project.price}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-1">
-                  {project.requiredSkills?.slice(0, 2).map((skill, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {skill}
-                    </Badge>
-                  ))}
-                  {project.requiredSkills?.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{project.requiredSkills.length - 2} more
-                    </Badge>
-                  )}
-                </div>
-
-                <Button
-                  className="w-full cursor-pointer"
+            {/* Projects grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map((project) => (
+                <Card
+                  key={project._id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
                   onClick={() => setSelectedProject(project)}
                 >
-                  {" "}
-                  View Details{" "}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardHeader>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        {getIcon(project.industry)}
+                      </div>
+                      <Badge variant="secondary">{project.industry}</Badge>
+                    </div>
+                    <CardTitle className="text-lg">{project.title}</CardTitle>
+                    <CardDescription className="text-sm line-clamp-1">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{project.duration}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Users className="h-4 w-4" />
+                        <span>{project.teamSize}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Badge className={getDifficultyColor(project.difficulty)}>
+                        {project.difficulty}
+                      </Badge>
+                      <span className="text-lg">₦{project.price}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      {project.requiredSkills
+                        ?.slice(0, 2)
+                        .map((skill, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {skill}
+                          </Badge>
+                        ))}
+                      {project.requiredSkills?.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{project.requiredSkills.length - 2} more
+                        </Badge>
+                      )}
+                    </div>
+
+                    <Button
+                      className="w-full cursor-pointer"
+                      onClick={() => setSelectedProject(project)}
+                    >
+                      {" "}
+                      View Details{" "}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
 
         {!filteredProjects.length && (
           <div className="text-center py-12">

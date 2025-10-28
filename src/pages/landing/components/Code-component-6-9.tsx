@@ -76,7 +76,7 @@ export function Dashboard({ user, currentProject, onStartNewProject }: Dashboard
     {
       id: '2',
       type: 'mentor',
-      message: 'Welcome to PM Experience! Your mentor will be assigned soon.',
+      message: 'Welcome to Provena! Your mentor will be assigned soon.',
       time: '1 day ago',
       unread: true
     }
@@ -93,7 +93,7 @@ export function Dashboard({ user, currentProject, onStartNewProject }: Dashboard
     {
       id: '2',
       action: 'Account Created',
-      description: 'Welcome to PM Experience!',
+      description: 'Welcome to Provena!',
       time: '1 day ago',
       type: 'account'
     }
@@ -131,7 +131,7 @@ export function Dashboard({ user, currentProject, onStartNewProject }: Dashboard
                 <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
                   <Target className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-semibold">PM Experience</span>
+                <span className="text-xl font-semibold">Provena</span>
               </div>
               <Separator orientation="vertical" className="h-6" />
               <h1 className="text-lg">Dashboard</h1>

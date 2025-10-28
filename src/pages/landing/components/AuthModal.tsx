@@ -148,12 +148,12 @@ AuthModalProps) {
             </div>
           </div>
           <DialogTitle className="text-center text-2xl">
-            {activeTab === "login" ? "Welcome Back" : "Join PM Experience"}
+            {activeTab === "login" ? "Welcome Back" : "Join Provena"}
           </DialogTitle>
           <DialogDescription className="text-center">
             {activeTab === "login"
               ? "Sign in to continue your PM journey"
-              : "Start building real-world PM experience today"}
+              : "Start building real-world Provena today"}
           </DialogDescription>
         </DialogHeader>
 
@@ -297,15 +297,12 @@ AuthModalProps) {
                     <SelectItem value="pm">
                       Product Manager (Aspiring)
                     </SelectItem>
-                    <SelectItem value="Designer">UI/UX Designer</SelectItem>
-                    <SelectItem value="Frontend Developer">
-                      Frontend Developer
+                    
+                    <SelectItem value="SUPER_ADMIN">
+                      Super Admin
                     </SelectItem>
-                    <SelectItem value="Backend Developer">
-                      Backend Developer
-                    </SelectItem>
-                    <SelectItem value="Mobile Developer">
-                      Mobile Developer
+                    <SelectItem value="SKILLED_MEMBER">
+                      Skilled Member
                     </SelectItem>
                     <SelectItem value="MENTOR">Mentor</SelectItem>
                   </SelectContent>

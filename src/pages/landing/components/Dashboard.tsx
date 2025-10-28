@@ -15,7 +15,10 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import Error from "./error/Error";
+import DashboardSkeletonLoader from "./loader/DashboardSkeletonLoader";
 import { ProjectDashboard } from "./ProjectDashboard";
 import { TeamFormation } from "./TeamFormation";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -31,7 +34,6 @@ import {
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import toast from "react-hot-toast";
 
 const currentProject: Project = {
   id: "12345",
@@ -76,7 +78,7 @@ export function Dashboard({ user }: DashboardProps) {
   // export function Dashboard({ user, currentProject, onStartNewProject }: DashboardProps) {
   const nav = useNavigate();
 
-  const { data, isPending, isError } = useGetDashboard();
+  const { data, isPending, isError, refetch: refetchData } = useGetDashboard();
 
   console.log("Dashboard data:", data);
 
@@ -122,8 +124,7 @@ export function Dashboard({ user }: DashboardProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (isPending) return <p>Loading dashboard...</p>;
-  if (isError) return <p>Failed to load dashboard.</p>;
+  if (isError) return <Error refetchData={refetchData} />;
 
   if (activeTab === "project") {
     if (projectPhase === "team-formation") {
@@ -227,414 +228,431 @@ export function Dashboard({ user }: DashboardProps) {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback className="text-lg">
-                      {user
-                        ? `${user.firstName?.[0] ?? ""}${
-                            user.lastName?.[0] ?? ""
-                          }`.toUpperCase()
-                        : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-lg">
-                      {user ? `${user.firstName} ${user.lastName}` : "Guest"}
-                    </CardTitle>
-                    <CardDescription className="capitalize">
-                      {user?.role ?? "—"}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Profile Completion</span>
-                    <span>{stats.profileCompletion}%</span>
-                  </div>
-                  <Progress value={stats.profileCompletion} className="h-2" />
-                </div>
-                <Separator />
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Points
-                    </span>
-                    <Badge variant="outline">{stats.points}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Projects
-                    </span>
-                    <Badge variant="outline">{stats.totalProjects}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Certificates
-                    </span>
-                    <Badge variant="outline">{stats.certificatesEarned}</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  className="w-full justify-start cursor-pointer"
-                  variant="outline"
-                  onClick={() => nav("/projects")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Start New Project
-                </Button>
-                <Button
-                  className="w-full justify-start cursor-pointer"
-                  variant="outline"
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  View Portfolio
-                </Button>
-                <Button
-                  className="w-full justify-start cursor-pointer"
-                  variant="outline"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Message Mentor
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="project">Current Project</TabsTrigger>
-                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-6">
-                {/* Stats Cards */}
-                <div className="grid md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm">Active Projects</CardTitle>
-                      <Target className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl">{currentProject ? 1 : 0}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {currentProject ? "In progress" : "No active projects"}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm">
-                        Milestones Completed
+      {isPending ? (
+        <DashboardSkeletonLoader />
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="text-lg">
+                        {user
+                          ? `${user.firstName?.[0] ?? ""}${
+                              user.lastName?.[0] ?? ""
+                            }`.toUpperCase()
+                          : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-lg">
+                        {user ? `${user.firstName} ${user.lastName}` : "Guest"}
                       </CardTitle>
-                      <Trophy className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl">
-                        {stats.completedMilestones}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Of {stats.totalMilestones} total
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm">Points Earned</CardTitle>
-                      <Award className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl">{stats.points}</div>
-                      <p className="text-xs text-muted-foreground">
-                        This month
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Current Project Status */}
-                {currentProject && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Current Project</CardTitle>
-                      <CardDescription>
-                        Your active project progress
+                      <CardDescription className="capitalize">
+                        {user?.role ?? "—"}
                       </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg mb-1">
-                            {currentProject.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {currentProject.industry}
-                          </p>
-                          <Badge variant="outline" className="mt-2">
-                            {currentProject.difficulty}
-                          </Badge>
-                        </div>
-                        <Button onClick={() => setActiveTab("project")}>
-                          View Project
-                        </Button>
-                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Profile Completion</span>
+                      <span>{stats.profileCompletion}%</span>
+                    </div>
+                    <Progress value={stats.profileCompletion} className="h-2" />
+                  </div>
+                  <Separator />
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Points
+                      </span>
+                      <Badge variant="outline">{stats.points}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Projects
+                      </span>
+                      <Badge variant="outline">{stats.totalProjects}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Certificates
+                      </span>
+                      <Badge variant="outline">
+                        {stats.certificatesEarned}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress</span>
-                          <span>
-                            {stats.completedMilestones}/{stats.totalMilestones}{" "}
-                            milestones
-                          </span>
-                        </div>
-                        <Progress
-                          value={
-                            (stats.completedMilestones /
-                              stats.totalMilestones) *
-                            100
-                          }
-                          className="h-2"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    className="w-full justify-start cursor-pointer"
+                    variant="outline"
+                    onClick={() => nav("/projects")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Start New Project
+                  </Button>
+                  <Button
+                    className="w-full justify-start cursor-pointer"
+                    variant="outline"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    View Portfolio
+                  </Button>
+                  <Button
+                    className="w-full justify-start cursor-pointer"
+                    variant="outline"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message Mentor
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
 
-                {!currentProject && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>No Active Project</CardTitle>
-                      <CardDescription>
-                        Start your PM journey today
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Choose from our curated selection of real-world projects
-                        to begin building your product management experience.
-                      </p>
-                      <Button
-                      // onClick={onStartNewProject}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Browse Projects
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="project">Current Project</TabsTrigger>
+                  <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                  <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
+                </TabsList>
 
-                {/* Recent Activity */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">
-                        Recent Activity
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {recentActivity?.length > 0 ? (
-                        recentActivity.map((activity) => (
-                          <div
-                            key={activity.id}
-                            className="flex items-start space-x-3"
-                          >
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                            <div className="flex-1">
-                              <p className="text-sm">{activity.action}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {activity.description}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {activity.time}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          No recent activity
+                <TabsContent value="overview" className="space-y-6">
+                  {/* Stats Cards */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm">
+                          Active Projects
+                        </CardTitle>
+                        <Target className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl">{currentProject ? 1 : 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {currentProject
+                            ? "In progress"
+                            : "No active projects"}
                         </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Notifications</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {notifications?.length > 0 ? (
-                        notifications.map((notification) => (
-                          <div
-                            key={notification.id}
-                            className="flex items-start space-x-3"
-                          >
-                            <div
-                              className={`w-2 h-2 rounded-full mt-2 ${
-                                notification.unread ? "bg-primary" : "bg-muted"
-                              }`}
-                            ></div>
-                            <div className="flex-1">
-                              <p className="text-sm">{notification.message}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.time}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          No notifications
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm">
+                          Milestones Completed
+                        </CardTitle>
+                        <Trophy className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl">
+                          {stats.completedMilestones}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Of {stats.totalMilestones} total
                         </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+                      </CardContent>
+                    </Card>
 
-              <TabsContent value="project" className="space-y-6">
-                {currentProject ? (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Project Workspace</CardTitle>
-                      <CardDescription>
-                        Manage your current project and team
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm">Points Earned</CardTitle>
+                        <Award className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl">{stats.points}</div>
+                        <p className="text-xs text-muted-foreground">
+                          This month
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Current Project Status */}
+                  {currentProject && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Current Project</CardTitle>
+                        <CardDescription>
+                          Your active project progress
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="text-lg mb-1">
                               {currentProject.title}
                             </h3>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            <p className="text-sm text-muted-foreground">
                               {currentProject.industry}
                             </p>
-                            <p className="text-sm">
-                              {currentProject.description}
-                            </p>
+                            <Badge variant="outline" className="mt-2">
+                              {currentProject.difficulty}
+                            </Badge>
                           </div>
+                          <Button onClick={() => setActiveTab("project")} className="cursor-pointer">
+                            View Project
+                          </Button>
                         </div>
 
-                        <div className="flex space-x-4">
-                          <Button
-                            onClick={() => setProjectPhase("team-formation")}
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Manage Team
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => setProjectPhase("active")}
-                          >
-                            <Calendar className="h-4 w-4 mr-2" />
-                            View Milestones
-                          </Button>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress</span>
+                            <span>
+                              {stats.completedMilestones}/
+                              {stats.totalMilestones} milestones
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              (stats.completedMilestones /
+                                stats.totalMilestones) *
+                              100
+                            }
+                            className="h-2"
+                          />
                         </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {!currentProject && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>No Active Project</CardTitle>
+                        <CardDescription>
+                          Start your PM journey today
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Choose from our curated selection of real-world
+                          projects to begin building your product management
+                          experience.
+                        </p>
+                        <Button
+                        // onClick={onStartNewProject}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Browse Projects
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Recent Activity */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">
+                          Recent Activity
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {recentActivity?.length > 0 ? (
+                          recentActivity.map((activity) => (
+                            <div
+                              key={activity.id}
+                              className="flex items-start space-x-3"
+                            >
+                              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                              <div className="flex-1">
+                                <p className="text-sm">{activity.action}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {activity.description}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {activity.time}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            No recent activity
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">
+                          Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {notifications?.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className="flex items-start space-x-3"
+                            >
+                              <div
+                                className={`w-2 h-2 rounded-full mt-2 ${
+                                  notification.unread
+                                    ? "bg-primary"
+                                    : "bg-muted"
+                                }`}
+                              ></div>
+                              <div className="flex-1">
+                                <p className="text-sm">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {notification.time}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            No notifications
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="project" className="space-y-6">
+                  {currentProject ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Project Workspace</CardTitle>
+                        <CardDescription>
+                          Manage your current project and team
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg mb-1">
+                                {currentProject.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {currentProject.industry}
+                              </p>
+                              <p className="text-sm">
+                                {currentProject.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-4">
+                            <Button
+                              onClick={() => setProjectPhase("team-formation")}
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Manage Team
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setProjectPhase("active")}
+                            >
+                              <Calendar className="h-4 w-4 mr-2" />
+                              View Milestones
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>No Active Project</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground mb-4">
+                          You don't have any active projects yet.
+                        </p>
+                        <Button
+                        // onClick={onStartNewProject}
+                        >
+                          Start New Project
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="portfolio" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Portfolio</CardTitle>
+                      <CardDescription>
+                        Your completed projects and case studies
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12">
+                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg mb-2">No Portfolio Items Yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Complete your first project to generate your portfolio
+                          case study
+                        </p>
+                        <Button
+                          variant="outline"
+                          // onClick={onStartNewProject}
+                        >
+                          Start Your First Project
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
-                ) : (
+                </TabsContent>
+
+                <TabsContent value="mentorship" className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>No Active Project</CardTitle>
+                      <CardTitle>Mentorship</CardTitle>
+                      <CardDescription>
+                        Connect with your assigned mentor
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground mb-4">
-                        You don't have any active projects yet.
-                      </p>
-                      <Button
-                      // onClick={onStartNewProject}
-                      >
-                        Start New Project
-                      </Button>
+                      <div className="text-center py-12">
+                        <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg mb-2">
+                          Mentor Assignment Pending
+                        </h3>
+                        <p className="text-muted-foreground mb-4">
+                          Your mentor will be assigned once you start your first
+                          project
+                        </p>
+                        <Button
+                          variant="outline"
+                          // onClick={onStartNewProject}
+                        >
+                          Start Project to Get Mentor
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="portfolio" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Portfolio</CardTitle>
-                    <CardDescription>
-                      Your completed projects and case studies
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg mb-2">No Portfolio Items Yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Complete your first project to generate your portfolio
-                        case study
-                      </p>
-                      <Button
-                        variant="outline"
-                        // onClick={onStartNewProject}
-                      >
-                        Start Your First Project
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="mentorship" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Mentorship</CardTitle>
-                    <CardDescription>
-                      Connect with your assigned mentor
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg mb-2">
-                        Mentor Assignment Pending
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        Your mentor will be assigned once you start your first
-                        project
-                      </p>
-                      <Button
-                        variant="outline"
-                        // onClick={onStartNewProject}
-                      >
-                        Start Project to Get Mentor
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
