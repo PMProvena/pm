@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { PaystackInitData } from "@/api/interfaces/projects";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-interface PaystackInitData {
-  email: string;
-  amount: number;
-  projectId: string;
-  userId: string;
-}
+
 
 export const usePayForProject = () => {
   return useMutation({

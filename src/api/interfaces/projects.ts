@@ -22,3 +22,10 @@ export interface ProjectSelectionProps {
   // currentProject: Project | null;
   // onStartNewProject: () => void;
 }
+
+export interface PaystackInitData {
+  email: string;
+  amount: number;
+  projectId: string;
+  userId: string;
+}
