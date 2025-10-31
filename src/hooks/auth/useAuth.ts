@@ -19,9 +19,16 @@ export const useRegister = () => {
     onSuccess: (data) => {
       toast.success("Account created successfully!");
 
-      // store full user details and token
+      // Store full response
       localStorage.setItem("userDetails", JSON.stringify(data));
-      localStorage.setItem("pmUserToken", data?.token);
+
+      // Store token for convenience
+      const token = data?.data?.token;
+      if (token) {
+        localStorage.setItem("pmUserToken", token);
+      } else {
+        console.warn("No token found in register response:", data);
+      }
     },
     onError: (error: any) => {
       const errMsg =
@@ -41,9 +48,16 @@ export const useLogin = () => {
     onSuccess: (data) => {
       toast.success("Logged in successfully!");
 
-      // store full user details and token
+      // Store full response
       localStorage.setItem("userDetails", JSON.stringify(data));
-      localStorage.setItem("pmUserToken", data?.token);
+
+      // Store token for convenience
+      const token = data?.data?.token;
+      if (token) {
+        localStorage.setItem("pmUserToken", token);
+      } else {
+        console.warn("No token found in login response:", data);
+      }
     },
     onError: (error: any) => {
       const errMsg =

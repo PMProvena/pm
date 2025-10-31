@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Project } from "./projects";
 import type { UserType } from "./user";
 
 export interface DashboardProps {
@@ -7,19 +9,29 @@ export interface DashboardProps {
 }
 
 export interface DashboardData {
-  profileCompletion: number;
-  points: number;
-  projects: number;
-  certificates: number;
-  activeProjects: number;
-  milestones: {
-    completed: number;
-    total: number;
+  data: {
+    activeProjects: number;
+    certificates: number;
+    milestones: {
+      completed: number;
+      total: number;
+    };
+    myProjects: Project[];
+    notifications: {
+      message: string;
+      timeAgo: string;
+    }[];
+    points: number;
+    pointsEarned: {
+      value: number;
+      period: string;
+    };
+    profileCompletion: number;
+    projects: number;
+    recentActivity: {
+      message: string;
+      timeAgo: string;
+      type: string;
+    }[];
   };
-  pointsEarned: {
-    value: number;
-    period: string;
-  };
-  recentActivity: any[];
-  notifications: any[];
 }

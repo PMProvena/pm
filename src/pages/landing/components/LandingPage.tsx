@@ -1,5 +1,5 @@
 import { Star, Target, Trophy, Users } from "lucide-react";
-import img1 from "@/assets/img-1.png"
+import img1 from "@/assets/img-1.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import { Link } from "react-router-dom";
 
 interface LandingPageProps {
   onAuthClick: (type: "login" | "signup") => void;
@@ -52,29 +53,29 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
     "Mobile Apps",
   ];
 
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Product Manager at TechCorp",
-      content:
-        "PM Experience gave me the real-world experience I needed to land my first PM role. The mentorship was invaluable!",
-      rating: 5,
-    },
-    {
-      name: "Marcus Rodriguez",
-      role: "Associate PM at StartupXYZ",
-      content:
-        "The project structure and team collaboration aspect perfectly mimicked what I experience in my current role.",
-      rating: 5,
-    },
-    {
-      name: "Emily Johnson",
-      role: "Junior PM at BigTech",
-      content:
-        "Building a portfolio with real case studies made all the difference in my interviews.",
-      rating: 5,
-    },
-  ];
+  // const testimonials = [
+  //   {
+  //     name: "Sarah Chen",
+  //     role: "Product Manager at TechCorp",
+  //     content:
+  //       "PM Experience gave me the real-world experience I needed to land my first PM role. The mentorship was invaluable!",
+  //     rating: 5,
+  //   },
+  //   {
+  //     name: "Marcus Rodriguez",
+  //     role: "Associate PM at StartupXYZ",
+  //     content:
+  //       "The project structure and team collaboration aspect perfectly mimicked what I experience in my current role.",
+  //     rating: 5,
+  //   },
+  //   {
+  //     name: "Emily Johnson",
+  //     role: "Junior PM at BigTech",
+  //     content:
+  //       "Building a portfolio with real case studies made all the difference in my interviews.",
+  //     rating: 5,
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,19 +83,18 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* <div className="flex items-center space-x-2"> */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-2">
+              <Link to={"/"}>
+                {" "}
                 <img
                   src="/pngs/logotwo.png"
                   alt="logo"
                   className="w-40 object-contain"
                 />
-              </div>
-              {/* <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <Target className="h-5 w-5 text-primary-foreground" />
-              </div> */}
-              {/* <span className="text-xl font-semibold">PM Experience</span> */}
+              </Link>
             </div>
+
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
@@ -135,8 +135,13 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             >
               Start Your PM Journey
             </Button>
-            <Button size="lg" variant="outline" className="cursor-pointer">
-              View Sample Projects
+            <Button
+              size="lg"
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() => onAuthClick("signup")}
+            >
+              Kickstart your PM career today.
             </Button>
           </div>
           <div className="relative max-w-4xl mx-auto">
@@ -263,7 +268,7 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4">
+      {/* <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl mb-4">Success Stories</h2>
@@ -301,14 +306,12 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl mb-4">
-            Ready to Start Your PM Journey?
-          </h2>
+          <h2 className="text-3xl md:text-4xl mb-4">Ready to excel as a PM?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
             Join hundreds of aspiring PMs who have successfully transitioned
             into product management roles
@@ -317,12 +320,18 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             <Button
               size="lg"
               variant="secondary"
+              className="cursor-pointer"
               onClick={() => onAuthClick("signup")}
             >
               Get Started Now
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              Learn More
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => onAuthClick("signup")}
+              className="cursor-pointer bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            >
+              Kickstart your PM career today.
             </Button>
           </div>
         </div>
@@ -333,10 +342,16 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
-                <Target className="h-4 w-4 text-primary-foreground" />
+              <div className="flex items-center space-x-2">
+                <Link to={"/"}>
+                  {" "}
+                  <img
+                    src="/pngs/logotwo.png"
+                    alt="logo"
+                    className="w-40 object-contain"
+                  />
+                </Link>
               </div>
-              <span className="text-lg">Provena</span>
             </div>
             <div className="text-sm text-muted-foreground">
               © 2025 Provena. All rights reserved.

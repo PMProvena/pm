@@ -2,17 +2,24 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL:
-    // process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://provena.onrender.com/api",
-  // ❗ Don't fix content-type here; browser will set it automatically for FormData
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://shula-pm-php.onrender.com/api",
 });
 
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("pmUserToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const storedUser = localStorage.getItem("userDetails");
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          const token = parsedUser?.data?.token; // ✅ matches structure
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        } catch (err) {
+          console.error("Failed to parse userDetails:", err);
+        }
       }
     }
     return config;

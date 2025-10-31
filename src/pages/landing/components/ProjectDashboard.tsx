@@ -55,6 +55,7 @@ interface ProjectDashboardProps {
 }
 
 export function ProjectDashboard({ project, onBack }: ProjectDashboardProps) {
+  console.log("project", project)
   const [activeTab, setActiveTab] = useState('milestones');
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);

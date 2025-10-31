@@ -37,18 +37,18 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
     isError,
     refetch: refetchProjects,
   } = useGetProjects() as {
-    data?: { projects: Project[] };
+    data?: { success: boolean; message: string; data: Project[] };
     isPending: boolean;
     isError: boolean;
     refetch: () => void;
   };
 
+  const { projects } = useMemo(() => {
+    return { projects: allProjects?.data || [] };
+  }, [allProjects]);
+
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  const { projects } = useMemo(() => {
-    return { projects: allProjects?.projects || [] };
-  }, [allProjects]);
 
   // map icons dynamically by industry
   const getIcon = (industry: string) => {
@@ -249,10 +249,10 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                     </Button> */}
                     {user && selectedProject && (
                       <PayButton
-                        email={user.email}
+                        email={user.data.email}
                         amount={selectedProject.price}
                         projectId={selectedProject._id}
-                        userId={user._id}
+                        userId={user.data._id}
                       >
                         {/* <DollarSign className="h-4 w-4 mr-2" /> */}
                         {/* ₦  */}

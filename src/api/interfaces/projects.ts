@@ -17,6 +17,8 @@ export interface Project {
   objectives: string[];
 }
 
+
+
 export interface ProjectSelectionProps {
   user?: UserType;
   // currentProject: Project | null;

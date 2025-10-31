@@ -8,14 +8,26 @@ import {
   Star,
   User,
   Users,
-  X
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 
@@ -26,7 +38,7 @@ interface Project {
   description: string;
   duration: string;
   price: number;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
   skills: string[];
   milestones: number;
   teamSize: number;
@@ -52,116 +64,129 @@ interface TeamFormationProps {
   onBack: () => void;
 }
 
-export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormationProps) {
+export function TeamFormation({
+  project,
+  onTeamComplete,
+  onBack,
+}: TeamFormationProps) {
+  console.log("current project", project);
 
-  console.log("current project", project)
-
-  const [selectedMembers, setSelectedMembers] = useState<{[key: string]: TeamMember}>({});
+  const [selectedMembers, setSelectedMembers] = useState<{
+    [key: string]: TeamMember;
+  }>({});
   const [showRemovalDialog, setShowRemovalDialog] = useState(false);
-  const [memberToRemove, setMemberToRemove] = useState<{role: string, member: TeamMember} | null>(null);
-  const [removalReason, setRemovalReason] = useState('');
+  const [memberToRemove, setMemberToRemove] = useState<{
+    role: string;
+    member: TeamMember;
+  } | null>(null);
+  const [removalReason, setRemovalReason] = useState("");
 
   // Mock available team members
-  const availableMembers: {[key: string]: TeamMember[]} = {
-    'UI/UX Designer': [
+  const availableMembers: { [key: string]: TeamMember[] } = {
+    "UI/UX Designer": [
       {
-        id: '1',
-        name: 'Sarah Chen',
-        role: 'UI/UX Designer',
-        experience: 'Intermediate',
+        id: "1",
+        name: "Sarah Chen",
+        role: "UI/UX Designer",
+        experience: "Intermediate",
         rating: 4.8,
         completedProjects: 12,
-        skills: ['Figma', 'Adobe XD', 'User Research', 'Prototyping'],
-        bio: 'Passionate about creating user-centered designs with 3+ years of experience in digital products.'
+        skills: ["Figma", "Adobe XD", "User Research", "Prototyping"],
+        bio: "Passionate about creating user-centered designs with 3+ years of experience in digital products.",
       },
       {
-        id: '2',
-        name: 'Alex Rivera',
-        role: 'UI/UX Designer',
-        experience: 'Beginner',
+        id: "2",
+        name: "Alex Rivera",
+        role: "UI/UX Designer",
+        experience: "Beginner",
         rating: 4.5,
         completedProjects: 6,
-        skills: ['Sketch', 'InVision', 'Wireframing', 'User Testing'],
-        bio: 'Recent design bootcamp graduate eager to work on real-world projects and learn from experienced teams.'
+        skills: ["Sketch", "InVision", "Wireframing", "User Testing"],
+        bio: "Recent design bootcamp graduate eager to work on real-world projects and learn from experienced teams.",
       },
       {
-        id: '3',
-        name: 'Jordan Kim',
-        role: 'UI/UX Designer',
-        experience: 'Advanced',
+        id: "3",
+        name: "Jordan Kim",
+        role: "UI/UX Designer",
+        experience: "Advanced",
         rating: 4.9,
         completedProjects: 25,
-        skills: ['Figma', 'Adobe Creative Suite', 'Design Systems', 'Accessibility'],
-        bio: 'Senior designer with expertise in enterprise design systems and accessibility standards.'
-      }
+        skills: [
+          "Figma",
+          "Adobe Creative Suite",
+          "Design Systems",
+          "Accessibility",
+        ],
+        bio: "Senior designer with expertise in enterprise design systems and accessibility standards.",
+      },
     ],
-    'Frontend Developer': [
+    "Frontend Developer": [
       {
-        id: '4',
-        name: 'Marcus Thompson',
-        role: 'Frontend Developer',
-        experience: 'Intermediate',
+        id: "4",
+        name: "Marcus Thompson",
+        role: "Frontend Developer",
+        experience: "Intermediate",
         rating: 4.7,
         completedProjects: 15,
-        skills: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js'],
-        bio: 'Full-stack developer specializing in React applications with a focus on performance and user experience.'
+        skills: ["React", "TypeScript", "Tailwind CSS", "Next.js"],
+        bio: "Full-stack developer specializing in React applications with a focus on performance and user experience.",
       },
       {
-        id: '5',
-        name: 'Emily Watson',
-        role: 'Frontend Developer',
-        experience: 'Beginner',
+        id: "5",
+        name: "Emily Watson",
+        role: "Frontend Developer",
+        experience: "Beginner",
         rating: 4.3,
         completedProjects: 8,
-        skills: ['HTML', 'CSS', 'JavaScript', 'Vue.js'],
-        bio: 'Junior developer passionate about clean code and modern frontend technologies.'
-      }
+        skills: ["HTML", "CSS", "JavaScript", "Vue.js"],
+        bio: "Junior developer passionate about clean code and modern frontend technologies.",
+      },
     ],
-    'Backend Developer': [
+    "Backend Developer": [
       {
-        id: '6',
-        name: 'David Park',
-        role: 'Backend Developer',
-        experience: 'Advanced',
+        id: "6",
+        name: "David Park",
+        role: "Backend Developer",
+        experience: "Advanced",
         rating: 4.9,
         completedProjects: 22,
-        skills: ['Node.js', 'Python', 'PostgreSQL', 'AWS'],
-        bio: 'Senior backend engineer with expertise in scalable architecture and cloud infrastructure.'
+        skills: ["Node.js", "Python", "PostgreSQL", "AWS"],
+        bio: "Senior backend engineer with expertise in scalable architecture and cloud infrastructure.",
       },
       {
-        id: '7',
-        name: 'Lisa Zhang',
-        role: 'Backend Developer',
-        experience: 'Intermediate',
+        id: "7",
+        name: "Lisa Zhang",
+        role: "Backend Developer",
+        experience: "Intermediate",
         rating: 4.6,
         completedProjects: 11,
-        skills: ['Express.js', 'MongoDB', 'Redis', 'Docker'],
-        bio: 'Backend developer focused on API design and database optimization.'
-      }
+        skills: ["Express.js", "MongoDB", "Redis", "Docker"],
+        bio: "Backend developer focused on API design and database optimization.",
+      },
     ],
-    'Mobile Developer': [
+    "Mobile Developer": [
       {
-        id: '8',
-        name: 'Ryan Foster',
-        role: 'Mobile Developer',
-        experience: 'Intermediate',
+        id: "8",
+        name: "Ryan Foster",
+        role: "Mobile Developer",
+        experience: "Intermediate",
         rating: 4.5,
         completedProjects: 9,
-        skills: ['React Native', 'iOS', 'Android', 'Firebase'],
-        bio: 'Mobile developer experienced in cross-platform development and native iOS/Android apps.'
-      }
-    ]
+        skills: ["React Native", "iOS", "Android", "Firebase"],
+        bio: "Mobile developer experienced in cross-platform development and native iOS/Android apps.",
+      },
+    ],
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'UI/UX Designer':
+      case "UI/UX Designer":
         return <Palette className="h-5 w-5" />;
-      case 'Frontend Developer':
+      case "Frontend Developer":
         return <Code className="h-5 w-5" />;
-      case 'Backend Developer':
+      case "Backend Developer":
         return <Database className="h-5 w-5" />;
-      case 'Mobile Developer':
+      case "Mobile Developer":
         return <Smartphone className="h-5 w-5" />;
       default:
         return <User className="h-5 w-5" />;
@@ -169,9 +194,9 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
   };
 
   const handleSelectMember = (role: string, member: TeamMember) => {
-    setSelectedMembers(prev => ({
+    setSelectedMembers((prev) => ({
       ...prev,
-      [role]: member
+      [role]: member,
     }));
   };
 
@@ -182,32 +207,57 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
 
   const confirmRemoval = () => {
     if (memberToRemove) {
-      setSelectedMembers(prev => {
+      setSelectedMembers((prev) => {
         const updated = { ...prev };
         delete updated[memberToRemove.role];
         return updated;
       });
       setShowRemovalDialog(false);
       setMemberToRemove(null);
-      setRemovalReason('');
-
+      setRemovalReason("");
     }
   };
 
-  const isTeamComplete = project.skills.every(skill => selectedMembers[skill]);
+  const isTeamComplete = project?.skills.every(
+    (skill) => selectedMembers[skill]
+  );
+
+  if (!project) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
+        <Users className="h-12 w-12 text-muted-foreground mb-4" />
+        <h2 className="text-lg font-semibold mb-2">No Active Project</h2>
+        <p className="text-muted-foreground max-w-md">
+          You currently don’t have an active project. Once a project is assigned
+          or started, you can form your team here.
+        </p>
+        <Button
+          variant="ghost"
+          onClick={onBack}
+          className="mt-6 cursor-pointer"
+        >
+          ← Back to Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <Button variant="ghost" onClick={onBack} className="mb-6 cursor-pointer">
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="mb-6 cursor-pointer"
+          >
             ← Back to Dashboard
           </Button>
 
           <div className="mb-8">
             <h1 className="text-3xl mb-2">Build Your Team</h1>
             <p className="text-muted-foreground">
-              Select skilled team members for {project.title}
+              Select skilled team members for {project?.title}
             </p>
           </div>
 
@@ -220,8 +270,11 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    {project.skills.map((skill) => (
-                      <div key={skill} className="flex items-center justify-between">
+                    {project?.skills.map((skill) => (
+                      <div
+                        key={skill}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center space-x-2">
                           {getRoleIcon(skill)}
                           <span className="text-sm">{skill}</span>
@@ -234,16 +287,25 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="pt-4 border-t">
                     <div className="flex justify-between text-sm mb-2">
                       <span>Team Formation</span>
-                      <span>{Object.keys(selectedMembers).length}/{project.skills.length}</span>
+                      <span>
+                        {Object.keys(selectedMembers).length}/
+                        {project.skills.length}
+                      </span>
                     </div>
                     <div className="bg-muted rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${(Object.keys(selectedMembers).length / project.skills.length) * 100}%` }}
+                        style={{
+                          width: `${
+                            (Object.keys(selectedMembers).length /
+                              project.skills.length) *
+                            100
+                          }%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -265,16 +327,24 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {Object.entries(selectedMembers).map(([role, member]) => (
-                      <div key={role} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div
+                        key={role}
+                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                      >
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">
-                              {member.name.split(' ').map(n => n[0]).join('')}
+                              {member.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">{role}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {role}
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -301,7 +371,10 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                       {getRoleIcon(skill)}
                       <h2 className="text-xl">{skill}</h2>
                       {selectedMembers[skill] && (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200"
+                        >
                           Selected
                         </Badge>
                       )}
@@ -310,12 +383,12 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
 
                   <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {availableMembers[skill]?.map((member) => (
-                      <Card 
-                        key={member.id} 
+                      <Card
+                        key={member.id}
                         className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedMembers[skill]?.id === member.id 
-                            ? 'ring-2 ring-primary bg-primary/5' 
-                            : ''
+                          selectedMembers[skill]?.id === member.id
+                            ? "ring-2 ring-primary bg-primary/5"
+                            : ""
                         }`}
                         onClick={() => handleSelectMember(skill, member)}
                       >
@@ -324,12 +397,19 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                             <div className="flex items-center space-x-3">
                               <Avatar>
                                 <AvatarFallback>
-                                  {member.name.split(' ').map(n => n[0]).join('')}
+                                  {member.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <CardTitle className="text-base">{member.name}</CardTitle>
-                                <CardDescription className="text-sm">{member.experience}</CardDescription>
+                                <CardTitle className="text-base">
+                                  {member.name}
+                                </CardTitle>
+                                <CardDescription className="text-sm">
+                                  {member.experience}
+                                </CardDescription>
                               </div>
                             </div>
                             {selectedMembers[skill]?.id === member.id && (
@@ -341,7 +421,7 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {member.bio}
                           </p>
-                          
+
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center space-x-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -355,7 +435,11 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
 
                           <div className="flex flex-wrap gap-1">
                             {member.skills.slice(0, 3).map((skill, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {skill}
                               </Badge>
                             ))}
@@ -382,8 +466,9 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
           <DialogHeader>
             <DialogTitle>Remove Team Member</DialogTitle>
             <DialogDescription>
-              Please provide a reason for removing {memberToRemove?.member.name} from your team. 
-              This request will be sent to the admin for approval.
+              Please provide a reason for removing {memberToRemove?.member.name}{" "}
+              from your team. This request will be sent to the admin for
+              approval.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -398,13 +483,13 @@ export function TeamFormation({ project, onTeamComplete, onBack }: TeamFormation
               />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowRemovalDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowRemovalDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button 
-                onClick={confirmRemoval}
-                disabled={!removalReason.trim()}
-              >
+              <Button onClick={confirmRemoval} disabled={!removalReason.trim()}>
                 Submit Request
               </Button>
             </div>

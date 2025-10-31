@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Lock, Mail, Target } from "lucide-react";
+import { useLogin, useRegister } from "@/hooks/auth/useAuth";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -19,10 +23,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useLogin, useRegister } from "@/hooks/auth/useAuth";
-// import { useAuthStore } from "@/store/authStore";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -43,6 +43,9 @@ AuthModalProps) {
   const registerMutation = useRegister();
 
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -103,10 +106,7 @@ AuthModalProps) {
           password: formData.password,
         },
         {
-          onSuccess: (response) => {
-            // Save user info and token in localStorage
-            localStorage.setItem("userDetails", JSON.stringify(response));
-
+          onSuccess: () => {
             onClose();
             navigate("/dashboard");
           },
@@ -117,34 +117,20 @@ AuthModalProps) {
 
   const isLoading = loginMutation.isPending || registerMutation.isPending;
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-
-  //   // Simulate auth process
-  //   setTimeout(() => {
-  // const mockUser = {
-  //   id: "1",
-  //   email: formData.email,
-  //   firstName: formData.firstName || "User",
-  //   lastName: formData.lastName || "Demo",
-  //   role: formData.role || "pm",
-  //   hasCompletedOnboarding: activeTab === "login",
-  // };
-
-  //     onAuthSuccess(mockUser);
-  //     setIsLoading(false);
-  //     onClose();
-  //   }, 1500);
-  // };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md h-[95vh] overflow-y-scroll">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
-              <Target className="h-6 w-6 text-primary-foreground" />
+            <div className="flex items-center space-x-2">
+              <Link to={"/"}>
+                {" "}
+                <img
+                  src="/pngs/logotwo.png"
+                  alt="logo"
+                  className="w-40 object-contain"
+                />
+              </Link>
             </div>
           </div>
           <DialogTitle className="text-center text-2xl">
@@ -190,38 +176,27 @@ AuthModalProps) {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
-                    type="password"
-                    className="pl-10"
+                    type={showPassword ? "text" : "password"}
+                    className="pl-10 pr-10"
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="role">Login as Role</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => handleInputChange("role", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pm">
-                      Product Manager (Aspiring)
-                    </SelectItem>
-                    <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
-                    <SelectItem value="MENTOR">Mentor</SelectItem>
-                    <SelectItem value="SKILLED_MEMBER">
-                      Skilled Member
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div> */}
 
               <Button
                 type="submit"
@@ -284,31 +259,6 @@ AuthModalProps) {
                 </div>
               </div>
 
-              {/* <div className="space-y-2">
-                <Label htmlFor="role">I want to join as</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => handleInputChange("role", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pm">
-                      Product Manager (Aspiring)
-                    </SelectItem>
-                    
-                    <SelectItem value="SUPER_ADMIN">
-                      Super Admin
-                    </SelectItem>
-                    <SelectItem value="SKILLED_MEMBER">
-                      Skilled Member
-                    </SelectItem>
-                    <SelectItem value="MENTOR">Mentor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div> */}
-
               <div className="space-y-2">
                 <Label htmlFor="experience">Experience Level</Label>
                 <Select
@@ -340,14 +290,27 @@ AuthModalProps) {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="signup-password"
-                    type="password"
-                    className={`pl-10 ${passwordError ? "border-red-500" : ""}`}
+                    type={showPassword ? "text" : "password"}
+                    className={`pl-10 pr-10 ${
+                      passwordError ? "border-red-500" : ""
+                    }`}
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -357,14 +320,27 @@ AuthModalProps) {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
-                    type="password"
-                    className={`pl-10 ${passwordError ? "border-red-500" : ""}`}
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`pl-10 pr-10 ${
+                      passwordError ? "border-red-500" : ""
+                    }`}
                     value={formData.confirmPassword}
                     onChange={(e) =>
                       handleInputChange("confirmPassword", e.target.value)
                     }
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
 
                 {passwordError && (

@@ -1,5 +1,4 @@
 import type { DashboardProps } from "@/api/interfaces/dashboard";
-import type { Project } from "@/api/interfaces/projects";
 import { useGetDashboard } from "@/hooks/projects/useGetDashboard";
 import {
   Award,
@@ -11,7 +10,6 @@ import {
   Settings,
   Target,
   Trophy,
-  User,
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -34,44 +32,45 @@ import {
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useGetMyProjects } from "@/hooks/projects/useGetMyProjects";
 
-const currentProject: Project = {
-  id: "12345",
-  _id: "12345", // ✅ added
-  title: "AI-Powered Customer Support Chatbot",
-  industry: "Technology",
-  description:
-    "Build an AI-driven chatbot that can handle real-time customer queries, provide automated responses, and escalate complex issues to human agents. The project involves integrating NLP models and a user-friendly dashboard for monitoring performance.",
-  duration: "8 weeks",
-  price: 1500,
-  difficulty: "Intermediate",
-  skills: [
-    "UI/UX Designer",
-    "Frontend Developer",
-    "Backend Developer",
-    "Mobile Developer",
-  ],
-  requiredSkills: [
-    "UI/UX Designer",
-    "Frontend Developer",
-    "Backend Developer",
-    "Mobile Developer",
-  ],
-  milestones: 5,
-  teamSize: 4,
-  icon: (
-    <span role="img" aria-label="robot">
-      🤖
-    </span>
-  ),
-  objectives: [
-    "Design and build the chatbot UI",
-    "Implement NLP model integration",
-    "Develop backend APIs for chat management",
-    "Create analytics dashboard for monitoring",
-    "Deploy chatbot to production environment",
-  ],
-};
+// const currentProject: Project = {
+//   id: "12345",
+//   _id: "12345", // ✅ added
+//   title: "AI-Powered Customer Support Chatbot",
+//   industry: "Technology",
+//   description:
+//     "Build an AI-driven chatbot that can handle real-time customer queries, provide automated responses, and escalate complex issues to human agents. The project involves integrating NLP models and a user-friendly dashboard for monitoring performance.",
+//   duration: "8 weeks",
+//   price: 1500,
+//   difficulty: "Intermediate",
+//   skills: [
+//     "UI/UX Designer",
+//     "Frontend Developer",
+//     "Backend Developer",
+//     "Mobile Developer",
+//   ],
+//   requiredSkills: [
+//     "UI/UX Designer",
+//     "Frontend Developer",
+//     "Backend Developer",
+//     "Mobile Developer",
+//   ],
+//   milestones: 5,
+//   teamSize: 4,
+//   icon: (
+//     <span role="img" aria-label="robot">
+//       🤖
+//     </span>
+//   ),
+//   objectives: [
+//     "Design and build the chatbot UI",
+//     "Implement NLP model integration",
+//     "Develop backend APIs for chat management",
+//     "Create analytics dashboard for monitoring",
+//     "Deploy chatbot to production environment",
+//   ],
+// };
 
 export function Dashboard({ user }: DashboardProps) {
   console.log("user", user);
@@ -79,6 +78,11 @@ export function Dashboard({ user }: DashboardProps) {
   const nav = useNavigate();
 
   const { data, isPending, isError, refetch: refetchData } = useGetDashboard();
+
+  const { data: MyProjects } = useGetMyProjects();
+  console.log("MyProjects", MyProjects);
+
+  const currentProject = data?.data?.myProjects?.[0] ?? null;
 
   console.log("Dashboard data:", data);
 
@@ -89,22 +93,24 @@ export function Dashboard({ user }: DashboardProps) {
 
   // Replace your old mock stats with this
   const stats = {
-    totalProjects: data?.projects ?? "---",
-    completedMilestones: data?.milestones?.completed ?? "---",
-    totalMilestones: data?.milestones?.total ?? "---",
-    points: data?.points ?? "---",
-    certificatesEarned: data?.certificates ?? "---",
-    profileCompletion: data?.profileCompletion ?? "---",
-    pointsPeriod: data?.pointsEarned?.period ?? "---",
-    pointsValue: data?.pointsEarned?.value ?? "---",
-    activeProjects: data?.activeProjects ?? "---",
+    totalProjects: data?.data?.projects ?? 0,
+    completedMilestones: data?.data?.milestones?.completed ?? 0,
+    totalMilestones: data?.data?.milestones?.total ?? 0,
+    points: data?.data?.points ?? 0,
+    certificatesEarned: data?.data?.certificates ?? 0,
+    profileCompletion: data?.data?.profileCompletion ?? 0,
+    pointsPeriod: data?.data?.pointsEarned?.period ?? "",
+    pointsValue: data?.data?.pointsEarned?.value ?? 0,
+    activeProjects: data?.data?.activeProjects ?? 0,
   };
 
   // Same with these
-  const notifications = data?.notifications?.length ? data.notifications : [];
+  const notifications = data?.data.notifications?.length
+    ? data.data.notifications
+    : [];
 
-  const recentActivity = data?.recentActivity?.length
-    ? data.recentActivity
+  const recentActivity = data?.data.recentActivity?.length
+    ? data.data.recentActivity
     : [];
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -124,28 +130,17 @@ export function Dashboard({ user }: DashboardProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (isError) return <Error refetchData={refetchData} />;
-
-  if (activeTab === "project") {
-    if (projectPhase === "team-formation") {
-      return (
-        <TeamFormation
-          project={currentProject}
-          onTeamComplete={() => setProjectPhase("active")}
-          onBack={() => setActiveTab("overview")}
-        />
-      );
-    }
-
-    if (projectPhase === "active") {
-      return (
-        <ProjectDashboard
-          project={currentProject}
-          onBack={() => setActiveTab("overview")}
-        />
-      );
-    }
+  useEffect(() => {
+  const totalProjects = data?.data?.projects ?? 0;
+  const myProjects = data?.data?.myProjects ?? [];
+  
+  if (!isPending && totalProjects === 0 && myProjects.length === 0) {
+    nav("/projects");
   }
+}, [data, isPending, nav]);
+
+
+  if (isError) return <Error refetchData={refetchData} />;
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,9 +175,9 @@ export function Dashboard({ user }: DashboardProps) {
                 className="relative cursor-pointer"
               >
                 <Bell className="h-5 w-5" />
-                {notifications.some((n) => n.unread) && (
+                {/* {notifications.some((n) => n.unread) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full"></div>
-                )}
+                )} */}
               </Button>
 
               {/* Settings */}
@@ -217,8 +212,8 @@ export function Dashboard({ user }: DashboardProps) {
               <Avatar>
                 <AvatarFallback>
                   {user
-                    ? `${user.firstName?.[0] ?? ""}${
-                        user.lastName?.[0] ?? ""
+                    ? `${user.data.firstName?.[0] ?? ""}${
+                        user.data.lastName?.[0] ?? ""
                       }`.toUpperCase()
                     : "U"}
                 </AvatarFallback>
@@ -241,18 +236,20 @@ export function Dashboard({ user }: DashboardProps) {
                     <Avatar className="h-12 w-12">
                       <AvatarFallback className="text-lg">
                         {user
-                          ? `${user.firstName?.[0] ?? ""}${
-                              user.lastName?.[0] ?? ""
+                          ? `${user.data.firstName?.[0] ?? ""}${
+                              user.data.lastName?.[0] ?? ""
                             }`.toUpperCase()
                           : "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg">
-                        {user ? `${user.firstName} ${user.lastName}` : "Guest"}
+                        {user
+                          ? `${user.data.firstName} ${user.data.lastName}`
+                          : "Guest"}
                       </CardTitle>
-                      <CardDescription className="capitalize">
-                        {user?.role ?? "—"}
+                      <CardDescription className="uppercase">
+                        {user?.data.role ?? "—"}
                       </CardDescription>
                     </div>
                   </div>
@@ -330,7 +327,7 @@ export function Dashboard({ user }: DashboardProps) {
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="project">Current Project</TabsTrigger>
                   <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                  <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
+                  <TabsTrigger value="teamMembers">Team Members</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -406,7 +403,10 @@ export function Dashboard({ user }: DashboardProps) {
                               {currentProject.difficulty}
                             </Badge>
                           </div>
-                          <Button onClick={() => setActiveTab("project")} className="cursor-pointer">
+                          <Button
+                            onClick={() => setActiveTab("project")}
+                            className="cursor-pointer"
+                          >
                             View Project
                           </Button>
                         </div>
@@ -421,9 +421,11 @@ export function Dashboard({ user }: DashboardProps) {
                           </div>
                           <Progress
                             value={
-                              (stats.completedMilestones /
-                                stats.totalMilestones) *
-                              100
+                              stats.totalMilestones && stats.totalMilestones > 0
+                                ? (stats.completedMilestones /
+                                    stats.totalMilestones) *
+                                  100
+                                : 0
                             }
                             className="h-2"
                           />
@@ -437,27 +439,29 @@ export function Dashboard({ user }: DashboardProps) {
                       <CardHeader>
                         <CardTitle>No Active Project</CardTitle>
                         <CardDescription>
-                          Start your PM journey today
+                          Start your first project to begin your PM journey.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Choose from our curated selection of real-world
-                          projects to begin building your product management
-                          experience.
+                      <CardContent className="text-center py-8">
+                        <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground mb-4">
+                          You currently have no active projects.
                         </p>
                         <Button
-                        // onClick={onStartNewProject}
+                          onClick={() => nav("/projects")}
+                          className="cursor-pointer"
                         >
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="h-4 w-4 mr-2 " />
                           Browse Projects
                         </Button>
                       </CardContent>
                     </Card>
                   )}
+                  {/* Current Project Status */}
 
-                  {/* Recent Activity */}
+                  {/* Recent Activity  & Notifications  */}
                   <div className="grid md:grid-cols-2 gap-6">
+                    {/* Recent Activity */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base">
@@ -465,20 +469,17 @@ export function Dashboard({ user }: DashboardProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {recentActivity?.length > 0 ? (
-                          recentActivity.map((activity) => (
+                        {recentActivity.length > 0 ? (
+                          recentActivity.map((activity, index) => (
                             <div
-                              key={activity.id}
+                              key={index}
                               className="flex items-start space-x-3"
                             >
                               <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                               <div className="flex-1">
-                                <p className="text-sm">{activity.action}</p>
+                                <p className="text-sm">{activity.message}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  {activity.description}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {activity.time}
+                                  {activity.timeAgo}
                                 </p>
                               </div>
                             </div>
@@ -491,6 +492,7 @@ export function Dashboard({ user }: DashboardProps) {
                       </CardContent>
                     </Card>
 
+                    {/* Notifications */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base">
@@ -498,25 +500,19 @@ export function Dashboard({ user }: DashboardProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {notifications?.length > 0 ? (
-                          notifications.map((notification) => (
+                        {notifications.length > 0 ? (
+                          notifications.map((notification, index) => (
                             <div
-                              key={notification.id}
+                              key={index}
                               className="flex items-start space-x-3"
                             >
-                              <div
-                                className={`w-2 h-2 rounded-full mt-2 ${
-                                  notification.unread
-                                    ? "bg-primary"
-                                    : "bg-muted"
-                                }`}
-                              ></div>
+                              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                               <div className="flex-1">
                                 <p className="text-sm">
                                   {notification.message}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {notification.time}
+                                  {notification.timeAgo}
                                 </p>
                               </div>
                             </div>
@@ -531,68 +527,91 @@ export function Dashboard({ user }: DashboardProps) {
                   </div>
                 </TabsContent>
 
+                {/* Current Project Tab*/}
                 <TabsContent value="project" className="space-y-6">
                   {currentProject ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Project Workspace</CardTitle>
-                        <CardDescription>
-                          Manage your current project and team
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="text-lg mb-1">
-                                {currentProject.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mb-2">
-                                {currentProject.industry}
-                              </p>
-                              <p className="text-sm">
-                                {currentProject.description}
-                              </p>
+                    projectPhase === "team-formation" ? (
+                      <TeamFormation
+                        project={currentProject}
+                        onTeamComplete={() => setProjectPhase("active")}
+                        onBack={() => setActiveTab("overview")}
+                      />
+                    ) : projectPhase === "active" ? (
+                      <ProjectDashboard
+                        project={currentProject}
+                        onBack={() => setActiveTab("overview")}
+                      />
+                    ) : (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Project Workspace</CardTitle>
+                          <CardDescription>
+                            Manage your current project and team
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="text-lg mb-1">
+                                  {currentProject.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {currentProject.industry}
+                                </p>
+                                <p className="text-sm">
+                                  {currentProject.description}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex space-x-4">
+                              <Button
+                                onClick={() =>
+                                  setProjectPhase("team-formation")
+                                }
+                              >
+                                <Users className="h-4 w-4 mr-2" />
+                                Manage Team
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => setProjectPhase("active")}
+                              >
+                                <Calendar className="h-4 w-4 mr-2" />
+                                View Milestones
+                              </Button>
                             </div>
                           </div>
-
-                          <div className="flex space-x-4">
-                            <Button
-                              onClick={() => setProjectPhase("team-formation")}
-                            >
-                              <Users className="h-4 w-4 mr-2" />
-                              Manage Team
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setProjectPhase("active")}
-                            >
-                              <Calendar className="h-4 w-4 mr-2" />
-                              View Milestones
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    )
                   ) : (
                     <Card>
                       <CardHeader>
                         <CardTitle>No Active Project</CardTitle>
+                        <CardDescription>
+                          Start your first project to begin your PM journey.
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">
-                          You don't have any active projects yet.
+                      <CardContent className="text-center my-12 space-y-2">
+                        <Target className="h-12 w-12 text-muted-foreground mx-auto " />
+                        <p className="text-muted-foreground">
+                          You currently have no active projects.
                         </p>
                         <Button
-                        // onClick={onStartNewProject}
+                          onClick={() => nav("/projects")}
+                          className="cursor-pointer mt-2"
                         >
-                          Start New Project
+                          <Plus className="h-4 w-4 mr-2 " />
+                          Browse Projects
                         </Button>
                       </CardContent>
                     </Card>
                   )}
                 </TabsContent>
 
+                {/* Portfolio  Tab*/}
                 <TabsContent value="portfolio" className="space-y-6">
                   <Card>
                     <CardHeader>
@@ -602,16 +621,20 @@ export function Dashboard({ user }: DashboardProps) {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-center py-12">
-                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg mb-2">No Portfolio Items Yet</h3>
-                        <p className="text-muted-foreground mb-4">
+                      <div className="text-center py-12 space-y-2">
+                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
+
+                        <h3 className="text-lg font-medium">
+                          No Portfolio Yet
+                        </h3>
+                        <p className="text-muted-foreground">
                           Complete your first project to generate your portfolio
                           case study
                         </p>
                         <Button
                           variant="outline"
-                          // onClick={onStartNewProject}
+                          className="mt-2 cursor-pointer"
+                          onClick={() => nav("/projects")}
                         >
                           Start Your First Project
                         </Button>
@@ -620,30 +643,25 @@ export function Dashboard({ user }: DashboardProps) {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="mentorship" className="space-y-6">
+                {/* Team Members Tab */}
+                <TabsContent value="teamMembers" className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Mentorship</CardTitle>
+                      <CardTitle>Team Members</CardTitle>
                       <CardDescription>
-                        Connect with your assigned mentor
+                        Collaborate with your teammates
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-center py-12">
-                        <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg mb-2">
-                          Mentor Assignment Pending
+                      <div className="text-center py-12 space-y-2">
+                        <Users className="h-12 w-12 text-muted-foreground mx-auto" />
+                        <h3 className="text-lg font-medium">
+                          No Team Members Yet
                         </h3>
-                        <p className="text-muted-foreground mb-4">
-                          Your mentor will be assigned once you start your first
-                          project
+                        <p className="text-muted-foreground">
+                          Once your team members have been added and approved,
+                          they will appear here.
                         </p>
-                        <Button
-                          variant="outline"
-                          // onClick={onStartNewProject}
-                        >
-                          Start Project to Get Mentor
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
