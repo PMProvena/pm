@@ -49,6 +49,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
 
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  console.log("selectedProject", selectedProject)
 
   // map icons dynamically by industry
   const getIcon = (industry: string) => {
@@ -72,7 +73,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
 
   const industries = useMemo(() => {
     const uniqueIndustries = Array.from(
-      new Set(projects.map((p) => p.industry))
+      new Set(projects?.map((p) => p.industry))
     );
     return ["all", ...uniqueIndustries];
   }, [projects]);
@@ -140,7 +141,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                   <div>
                     <h3 className="text-lg mb-3">Project Objectives</h3>
                     <ul className="space-y-2">
-                      {selectedProject.objectives.map((objective, index) => (
+                      {selectedProject?.objectives?.map((objective, index) => (
                         <li key={index} className="flex items-start space-x-2">
                           <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                           <span className="text-sm">{objective}</span>
@@ -152,7 +153,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                   <div>
                     <h3 className="text-lg mb-3">Required Skills</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedProject.requiredSkills.map((skill, index) => (
+                      {selectedProject?.requiredSkills?.map((skill, index) => (
                         <Badge key={index} variant="outline">
                           {skill}
                         </Badge>
@@ -299,7 +300,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
             <div className="mb-8">
               <h3 className="text-lg mb-4">Filter by Industry</h3>
               <div className="flex flex-wrap gap-2">
-                {industries.map((industry) => (
+                {industries?.map((industry) => (
                   <Button
                     key={industry}
                     variant={
@@ -316,7 +317,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
 
             {/* Projects grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
+              {filteredProjects?.map((project) => (
                 <Card
                   key={project._id}
                   className="cursor-pointer hover:shadow-lg transition-shadow"
