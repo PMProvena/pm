@@ -13,7 +13,7 @@ export const usePayForProject = () => {
       email: string;
     }) => {
       // Replace with your actual API call to save payment
-      const res = await fetch("/api/payments/webhook", {
+      const res = await fetch("https://shula-pm-php.onrender.com/api/payments/webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
