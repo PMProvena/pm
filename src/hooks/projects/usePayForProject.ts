@@ -1,36 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { PaystackInitData } from "@/api/interfaces/projects";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-
-
+// Hook to call your backend after payment succeeds
 export const usePayForProject = () => {
   return useMutation({
-    mutationFn: async (payload: PaystackInitData) => {
-      // Prepare Paystack config
-      const config = {
-        // reference: new Date().getTime().toString(),
-        email: payload.email,
-        amount: payload.amount * 100, // convert to kobo
+    mutationFn: async (payload: {
+      reference: string;
+      projectId: string;
+      userId: string;
+      amount: number;
+      email: string;
+    }) => {
+      // Replace with your actual API call to save payment
+      const res = await fetch("/api/payments/webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        // currency: "USD",
-        publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-        metadata: {
-          projectId: payload.projectId,
-          userId: payload.userId,
-        },
-        // text: "Pay Now",
-        // onSuccess: () =>
-        //   alert("Thanks for doing business with us! Come back soon!!"),
-        // onClose: () => alert("Wait! You need this oil, don't go!!!!"),
-      };
+      if (!res.ok) throw new Error("Failed to save payment");
 
-      return config;
+      return res.json();
     },
     onError: (err: any) => {
-      console.error(err);
-      toast.error("Error initializing payment. Please try again.");
+      toast.error(err.message || "Failed to record payment.");
     },
   });
 };
