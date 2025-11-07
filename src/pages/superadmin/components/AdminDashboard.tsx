@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "./AdminLayout";
 import { DashboardOverview } from "./DashboardOverview";
 import { UserManagement } from "./UserManagement";
@@ -7,8 +7,19 @@ import { TeamOversight } from "./TeamOversight";
 import { MentorAssignment } from "./MentorAssignment";
 import { RewardsSystem } from "./RewardsSystem";
 import { QualityControl } from "./QualityControl";
+import { useAuthStore } from "@/store/authStore";
+import { AuthModal } from "@/pages/landing/components/AuthModal";
 
 export function AdminDashboard() {
+  const user = useAuthStore((state) => state.user);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setShowAuthModal(true);
+    }
+  }, [user]);
+
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const renderContent = () => {
@@ -35,6 +46,14 @@ export function AdminDashboard() {
   return (
     <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       {renderContent()}
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialTab="login"
+        onAuthSuccess={() => setShowAuthModal(false)}
+        hideSignup={true}
+      />
     </AdminLayout>
   );
 }

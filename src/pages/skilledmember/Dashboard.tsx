@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "./components/skilled-member/Header";
 import { ProjectCard } from "./components/skilled-member/ProjectCard";
 import { TaskList } from "./components/skilled-member/TaskList";
@@ -10,6 +10,7 @@ import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { BarChart3, Users, Target, Calendar } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { AuthModal } from "../landing/components/AuthModal";
 
 const mockProjects = [
   {
@@ -132,9 +133,17 @@ const mockNotifications = [
 export default function SkilledMemberDashboard() {
   const user = useAuthStore((state) => state.user);
   console.log("SkilledMemberDashboard user:", user);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setShowAuthModal(true);
+    }
+  }, [user]);
+
   // Mock data
   const mockUser = {
-    name: user.firstName || "Sarah",
+    name: user?.firstName || "Sarah",
     role: user?.subRole || "UI/UX Designer",
     avatar: "",
     points: 2450,
@@ -327,6 +336,14 @@ export default function SkilledMemberDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialTab="login"
+        onAuthSuccess={() => setShowAuthModal(false)}
+        hideSignup={true}
+      />
     </div>
   );
 }

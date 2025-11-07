@@ -1,62 +1,87 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar, CheckCircle, CreditCard, Lock, User } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Separator } from "./ui/separator";
 
-interface PaymentFlowProps {
-  project: any;
-  onPaymentSuccess: () => void;
-  onBack: () => void;
-}
+// interface PaymentFlowProps {
+//   project: any;
+//   onPaymentSuccess: () => void;
+//   onBack: () => void;
+// }
+//
 
-export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowProps) {
-  const [step, setStep] = useState<'details' | 'payment' | 'processing' | 'success'>('details');
+const project = {
+  id: "proj-001",
+  title: "AI-Powered E-Commerce Recommender",
+  industry: "Technology / E-Commerce",
+  duration: "6 weeks",
+  difficulty: "Intermediate",
+  price: 299,
+  description:
+    "Build a recommendation system that suggests products to users using collaborative filtering and machine learning models.",
+  image:
+    "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&w=800&q=80",
+};
+
+export function PaymentFlow() {
+  // export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowProps) {
+
+  const [step, setStep] = useState<
+    "details" | "payment" | "processing" | "success"
+  >("details");
   const [paymentData, setPaymentData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: '',
-    billingAddress: '',
-    city: '',
-    zipCode: ''
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardName: "",
+    billingAddress: "",
+    city: "",
+    zipCode: "",
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setPaymentData(prev => ({ ...prev, [field]: value }));
+    setPaymentData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePayment = async () => {
-    setStep('processing');
-    
+    setStep("processing");
+
     // Simulate payment processing
     setTimeout(() => {
-      setStep('success');
+      setStep("success");
       setTimeout(() => {
-        onPaymentSuccess();
+        // onPaymentSuccess();
       }, 2000);
     }, 3000);
   };
 
-  if (step === 'processing') {
+  if (step === "processing") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <h3 className="text-lg mb-2">Processing Payment</h3>
-            <p className="text-muted-foreground text-sm">Please wait while we process your payment...</p>
+            <p className="text-muted-foreground text-sm">
+              Please wait while we process your payment...
+            </p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (step === 'success') {
+  if (step === "success") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -81,7 +106,11 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <Button variant="ghost" onClick={onBack} className="mb-6">
+          <Button
+            variant="ghost"
+            // onClick={onBack}
+            className="mb-6"
+          >
             ← Back to Project Details
           </Button>
 
@@ -96,7 +125,7 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {step === 'details' && (
+                  {step === "details" && (
                     <>
                       <div className="space-y-4">
                         <div>
@@ -108,7 +137,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                               placeholder="1234 5678 9012 3456"
                               className="pl-10"
                               value={paymentData.cardNumber}
-                              onChange={(e) => handleInputChange('cardNumber', e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("cardNumber", e.target.value)
+                              }
                             />
                           </div>
                         </div>
@@ -123,7 +154,12 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                                 placeholder="MM/YY"
                                 className="pl-10"
                                 value={paymentData.expiryDate}
-                                onChange={(e) => handleInputChange('expiryDate', e.target.value)}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    "expiryDate",
+                                    e.target.value
+                                  )
+                                }
                               />
                             </div>
                           </div>
@@ -133,7 +169,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                               id="cvv"
                               placeholder="123"
                               value={paymentData.cvv}
-                              onChange={(e) => handleInputChange('cvv', e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("cvv", e.target.value)
+                              }
                             />
                           </div>
                         </div>
@@ -147,7 +185,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                               placeholder="John Doe"
                               className="pl-10"
                               value={paymentData.cardName}
-                              onChange={(e) => handleInputChange('cardName', e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("cardName", e.target.value)
+                              }
                             />
                           </div>
                         </div>
@@ -157,14 +197,19 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
 
                       <div className="space-y-4">
                         <h4 className="text-sm">Billing Address</h4>
-                        
+
                         <div>
                           <Label htmlFor="billingAddress">Address</Label>
                           <Input
                             id="billingAddress"
                             placeholder="123 Main Street"
                             value={paymentData.billingAddress}
-                            onChange={(e) => handleInputChange('billingAddress', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "billingAddress",
+                                e.target.value
+                              )
+                            }
                           />
                         </div>
 
@@ -175,7 +220,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                               id="city"
                               placeholder="San Francisco"
                               value={paymentData.city}
-                              onChange={(e) => handleInputChange('city', e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("city", e.target.value)
+                              }
                             />
                           </div>
                           <div>
@@ -184,7 +231,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                               id="zipCode"
                               placeholder="94105"
                               value={paymentData.zipCode}
-                              onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("zipCode", e.target.value)
+                              }
                             />
                           </div>
                         </div>
@@ -197,8 +246,8 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                         </span>
                       </div>
 
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         size="lg"
                         onClick={handlePayment}
                       >
@@ -219,7 +268,9 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <h4 className="text-sm">{project.title}</h4>
-                    <p className="text-xs text-muted-foreground">{project.industry}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {project.industry}
+                    </p>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">{project.duration}</Badge>
                       <Badge variant="outline">{project.difficulty}</Badge>
@@ -260,11 +311,14 @@ export function PaymentFlow({ project, onPaymentSuccess, onBack }: PaymentFlowPr
 
               <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle className="text-sm">Money-Back Guarantee</CardTitle>
+                  <CardTitle className="text-sm">
+                    Money-Back Guarantee
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground">
-                    Not satisfied within the first week? Get a full refund, no questions asked.
+                    Not satisfied within the first week? Get a full refund, no
+                    questions asked.
                   </p>
                 </CardContent>
               </Card>

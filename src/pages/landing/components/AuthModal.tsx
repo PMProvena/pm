@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -29,12 +29,14 @@ interface AuthModalProps {
   onClose: () => void;
   initialTab: "login" | "signup";
   onAuthSuccess: (user: any) => void;
+  hideSignup?: boolean;
 }
 
 export function AuthModal({
   isOpen,
   onClose,
   initialTab,
+  hideSignup,
 }: // onAuthSuccess,
 AuthModalProps) {
   // const login = useAuthStore((state) => state.login);
@@ -118,7 +120,14 @@ AuthModalProps) {
   const isLoading = loginMutation.isPending || registerMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        if (!hideSignup) {
+          onClose(); // only allow closing if hideSignup is false
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md h-[95vh] overflow-y-scroll">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
@@ -138,7 +147,7 @@ AuthModalProps) {
           </DialogTitle>
           <DialogDescription className="text-center">
             {activeTab === "login"
-              ? "Sign in to continue your PM journey"
+              ? "Sign in to continue"
               : "Start building real-world Provena today"}
           </DialogDescription>
         </DialogHeader>
@@ -147,10 +156,13 @@ AuthModalProps) {
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as "login" | "signup")}
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+          {!hideSignup && (
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              {/* {!hideSignup && <TabsTrigger value="signup">Sign Up</TabsTrigger>} */}
+            </TabsList>
+          )}
 
           <TabsContent value="login" className="space-y-4 mt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -214,154 +226,160 @@ AuthModalProps) {
             </form>
           </TabsContent>
 
-          <TabsContent value="signup" className="space-y-4 mt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    placeholder="John"
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      handleInputChange("firstName", e.target.value)
-                    }
-                    required
-                  />
+          {!hideSignup && (
+            <TabsContent value="signup" className="space-y-4 mt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      placeholder="John"
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        handleInputChange("firstName", e.target.value)
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      placeholder="Doe"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value)
+                      }
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    placeholder="Doe"
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      handleInputChange("lastName", e.target.value)
-                    }
-                    required
-                  />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="pl-10"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    required
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      className="pl-10"
+                      value={formData.email}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="experience">Experience Level</Label>
-                <Select
-                  value={formData.experience}
-                  onValueChange={(value) =>
-                    handleInputChange("experience", value)
-                  }
+                <div className="space-y-2">
+                  <Label htmlFor="experience">Experience Level</Label>
+                  <Select
+                    value={formData.experience}
+                    onValueChange={(value) =>
+                      handleInputChange("experience", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select experience level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">
+                        Beginner (0-1 years)
+                      </SelectItem>
+                      <SelectItem value="intermediate">
+                        Intermediate (1-3 years)
+                      </SelectItem>
+                      <SelectItem value="experienced">
+                        Experienced (3+ years)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="signup-password"
+                      type={showPassword ? "text" : "password"}
+                      className={`pl-10 pr-10 ${
+                        passwordError ? "border-red-500" : ""
+                      }`}
+                      value={formData.password}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      className={`pl-10 pr-10 ${
+                        passwordError ? "border-red-500" : ""
+                      }`}
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        handleInputChange("confirmPassword", e.target.value)
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  {passwordError && (
+                    <p className="text-sm text-red-500 mt-1">{passwordError}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full cursor-pointer"
+                  disabled={isLoading}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select experience level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">
-                      Beginner (0-1 years)
-                    </SelectItem>
-                    <SelectItem value="intermediate">
-                      Intermediate (1-3 years)
-                    </SelectItem>
-                    <SelectItem value="experienced">
-                      Experienced (3+ years)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  {isLoading ? "Creating Account..." : "Create Account"}
+                </Button>
 
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="signup-password"
-                    type={showPassword ? "text" : "password"}
-                    className={`pl-10 pr-10 ${
-                      passwordError ? "border-red-500" : ""
-                    }`}
-                    value={formData.password}
-                    onChange={(e) =>
-                      handleInputChange("password", e.target.value)
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    className={`pl-10 pr-10 ${
-                      passwordError ? "border-red-500" : ""
-                    }`}
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      handleInputChange("confirmPassword", e.target.value)
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-
-                {passwordError && (
-                  <p className="text-sm text-red-500 mt-1">{passwordError}</p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full cursor-pointer"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating Account..." : "Create Account"}
-              </Button>
-
-              <p className="text-xs text-muted-foreground text-center">
-                By signing up, you agree to our Terms of Service and Privacy
-                Policy
-              </p>
-            </form>
-          </TabsContent>
+                <p className="text-xs text-muted-foreground text-center">
+                  By signing up, you agree to our Terms of Service and Privacy
+                  Policy
+                </p>
+              </form>
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Social Login Options */}

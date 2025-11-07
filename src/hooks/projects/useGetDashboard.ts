@@ -17,5 +17,8 @@ export const useGetDashboard = () => {
         "Failed to fetch projects. Please try again.";
       toast.error(errMsg);
     },
+     retry: 0,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minute
   } as any); // ✅ workaround for TS type mismatch in React Query v5
 };
