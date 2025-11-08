@@ -2,6 +2,7 @@ export interface UserType {
   data: {
     _id: string;
     id: string;
+    userId: string;
     email: string;
     firstName: string;
     lastName: string;

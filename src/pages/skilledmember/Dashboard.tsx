@@ -141,6 +141,8 @@ export default function SkilledMemberDashboard() {
     }
   }, [user]);
 
+  
+
   // Mock data
   const mockUser = {
     name: user?.firstName || "Sarah",

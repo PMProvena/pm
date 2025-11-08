@@ -10,14 +10,29 @@ export const usePayForProject = () => {
       projectId: string;
       userId: string;
       amount: number;
-      email: string;
     }) => {
-      // Replace with your actual API call to save payment
-      const res = await fetch("https://shula-pm-php.onrender.com/api/payments/webhook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // Backend expects payload in this structure
+      const body = {
+        event: "charge.success",
+        data: {
+          reference: payload.reference,
+          amount: payload.amount,
+          currency: "NGN",
+          metadata: {
+            projectId: payload.projectId,
+            userId: payload.userId,
+          },
+        },
+      };
+
+      const res = await fetch(
+        "https://shula-pm-php.onrender.com/api/payments/webhook",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to save payment");
 

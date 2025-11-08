@@ -218,7 +218,7 @@ export function TeamFormation({
     }
   };
 
-  const isTeamComplete = project?.skills.every(
+  const isTeamComplete = project?.skills?.every(
     (skill) => selectedMembers[skill]
   );
 
@@ -270,7 +270,7 @@ export function TeamFormation({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    {project?.skills.map((skill) => (
+                    {project?.skills?.map((skill) => (
                       <div
                         key={skill}
                         className="flex items-center justify-between"
@@ -292,8 +292,8 @@ export function TeamFormation({
                     <div className="flex justify-between text-sm mb-2">
                       <span>Team Formation</span>
                       <span>
-                        {Object.keys(selectedMembers).length}/
-                        {project.skills.length}
+                        {Object.keys(selectedMembers)?.length}/
+                        {project.skills?.length}
                       </span>
                     </div>
                     <div className="bg-muted rounded-full h-2">
@@ -301,8 +301,8 @@ export function TeamFormation({
                         className="bg-primary h-2 rounded-full transition-all"
                         style={{
                           width: `${
-                            (Object.keys(selectedMembers).length /
-                              project.skills.length) *
+                            (Object.keys(selectedMembers)?.length /
+                              project.skills?.length) *
                             100
                           }%`,
                         }}
@@ -326,7 +326,7 @@ export function TeamFormation({
                     <CardTitle className="text-lg">Selected Team</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {Object.entries(selectedMembers).map(([role, member]) => (
+                    {Object.entries(selectedMembers)?.map(([role, member]) => (
                       <div
                         key={role}
                         className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
@@ -364,7 +364,7 @@ export function TeamFormation({
 
             {/* Available Members */}
             <div className="lg:col-span-3 space-y-8">
-              {project.skills.map((skill) => (
+              {project?.skills?.map((skill) => (
                 <div key={skill}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
@@ -434,7 +434,7 @@ export function TeamFormation({
                           </div>
 
                           <div className="flex flex-wrap gap-1">
-                            {member.skills.slice(0, 3).map((skill, index) => (
+                            {member.skills.slice(0, 3)?.map((skill, index) => (
                               <Badge
                                 key={index}
                                 variant="outline"

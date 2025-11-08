@@ -131,14 +131,13 @@ export function Dashboard({ user }: DashboardProps) {
   }, []);
 
   useEffect(() => {
-  const totalProjects = data?.data?.projects ?? 0;
-  const myProjects = data?.data?.myProjects ?? [];
-  
-  if (!isPending && totalProjects === 0 && myProjects.length === 0) {
-    nav("/projects");
-  }
-}, [data, isPending, nav]);
+    const totalProjects = data?.data?.projects ?? 0;
+    const myProjects = data?.data?.myProjects ?? [];
 
+    if (!isPending && totalProjects === 0 && myProjects.length === 0) {
+      nav("/projects");
+    }
+  }, [data, isPending, nav]);
 
   if (isError) return <Error refetchData={refetchData} />;
 
@@ -341,7 +340,7 @@ export function Dashboard({ user }: DashboardProps) {
                         <Target className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl">{currentProject ? 1 : 0}</div>
+                        <div className="text-2xl">{data.data.activeProjects ?? 0}</div>
                         <p className="text-xs text-muted-foreground">
                           {currentProject
                             ? "In progress"

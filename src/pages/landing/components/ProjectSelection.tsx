@@ -49,7 +49,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
 
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  console.log("selectedProject", selectedProject)
+  console.log("selectedProject", selectedProject);
 
   // map icons dynamically by industry
   const getIcon = (industry: string) => {
@@ -253,7 +253,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                         email={user.data.email}
                         amount={selectedProject.price}
                         projectId={selectedProject._id}
-                        userId={user.data._id}
+                        userId={user.data.userId}
                       >
                         {/* <DollarSign className="h-4 w-4 mr-2" /> */}
                         {/* ₦  */}
