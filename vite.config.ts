@@ -4,7 +4,7 @@ import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  base: "./", // important for Vercel static deploy
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
