@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/api/axios";
 import toast from "react-hot-toast";
 
@@ -42,6 +42,7 @@ export interface CreateProjectResponse {
 }
 
 export const useCreateProject = () => {
+  const queryClient = useQueryClient();
   return useMutation<CreateProjectResponse, any, CreateProjectPayload>({
     mutationFn: async (payload) => {
       const { data } = await api.post<CreateProjectResponse>(
@@ -52,6 +53,7 @@ export const useCreateProject = () => {
     },
     onSuccess: (res) => {
       toast.success(res.message || "Project created successfully!");
+       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: (error: any) => {
       const errMsg =

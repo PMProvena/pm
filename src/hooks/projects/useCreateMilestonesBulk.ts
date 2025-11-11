@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/api/axios";
 import toast from "react-hot-toast";
 
@@ -23,6 +23,7 @@ interface MilestonesResponse {
 }
 
 export const useCreateMilestonesBulk = (projectId: number) => {
+  const queryClient = useQueryClient();
   return useMutation<MilestonesResponse, any, MilestonesBulkPayload>({
     mutationFn: async (payload) => {
       const { data } = await api.post<MilestonesResponse>(
@@ -33,6 +34,7 @@ export const useCreateMilestonesBulk = (projectId: number) => {
     },
     onSuccess: (res) => {
       toast.success(res.message || "Milestones created successfully!");
+       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: (error: any) => {
       const errMsg =
