@@ -1,4 +1,11 @@
-import { Calendar, Edit, Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -7,168 +14,167 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Progress } from "./ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-
-const industries = [
-  { id: 1, name: "FinTech", activeProjects: 23, totalProjects: 68, description: "Financial technology solutions" },
-  { id: 2, name: "Healthcare", activeProjects: 18, totalProjects: 50, description: "Healthcare and medical technology" },
-  { id: 3, name: "E-commerce", activeProjects: 15, totalProjects: 43, description: "Online retail and marketplace solutions" },
-  { id: 4, name: "EdTech", activeProjects: 12, totalProjects: 31, description: "Educational technology platforms" },
-  { id: 5, name: "SaaS", activeProjects: 21, totalProjects: 59, description: "Software as a Service solutions" }
-];
-
-const projectBriefs = [
-  { 
-    id: 1, 
-    title: "Mobile Payment App", 
-    industry: "FinTech", 
-    duration: "6 weeks", 
-    difficulty: "Intermediate",
-    teamsWorking: 5,
-    completionRate: 78
-  },
-  { 
-    id: 2, 
-    title: "Telemedicine Platform", 
-    industry: "Healthcare", 
-    duration: "8 weeks", 
-    difficulty: "Advanced",
-    teamsWorking: 3,
-    completionRate: 85
-  },
-  { 
-    id: 3, 
-    title: "Inventory Management System", 
-    industry: "E-commerce", 
-    duration: "4 weeks", 
-    difficulty: "Beginner",
-    teamsWorking: 7,
-    completionRate: 92
-  },
-  { 
-    id: 4, 
-    title: "Student Analytics Dashboard", 
-    industry: "EdTech", 
-    duration: "6 weeks", 
-    difficulty: "Intermediate",
-    teamsWorking: 4,
-    completionRate: 67
-  }
-];
-
-const milestones = [
-  { 
-    id: 1, 
-    projectId: 1, 
-    week: 1, 
-    title: "Market Research & Problem Definition", 
-    deliverables: ["User Research Report", "Problem Statement", "Competitive Analysis"],
-    status: "active"
-  },
-  { 
-    id: 2, 
-    projectId: 1, 
-    week: 2, 
-    title: "Solution Ideation & Validation", 
-    deliverables: ["Solution Concepts", "User Feedback", "Technical Feasibility"],
-    status: "active"
-  },
-  { 
-    id: 3, 
-    projectId: 1, 
-    week: 3, 
-    title: "MVP Definition & Design", 
-    deliverables: ["MVP Specification", "User Journey", "Wireframes"],
-    status: "active"
-  },
-  { 
-    id: 4, 
-    projectId: 1, 
-    week: 4, 
-    title: "Development Planning", 
-    deliverables: ["Technical Architecture", "Development Timeline", "Resource Plan"],
-    status: "active"
-  }
-];
+import { useNavigate } from "react-router-dom";
+import { useGetProjects } from "@/hooks/projects/useGetProjects";
+import type { Project } from "@/api/interfaces/projects";
+import Error from "@/pages/landing/components/error/Error";
 
 export function ProjectManagement() {
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const navigate = useNavigate();
+
+  const {
+    data: allProjects,
+    isPending,
+    isError,
+    refetch: refetchProjects,
+  } = useGetProjects() as {
+    data?: { success: boolean; message: string; data: Project[] };
+    isPending: boolean;
+    isError: boolean;
+    refetch: () => void;
+  };
+
+  console.log("allProjects", allProjects);
+
+  const projects = allProjects?.data ?? [];
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
+
+  const selectedProject = projects.find((p) => p._id === selectedProjectId);
+
+  if (isError) return <Error refetchData={refetchProjects} />;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Project Management</h1>
-          <p className="text-muted-foreground">Manage industries, project briefs, and milestones</p>
+          <p className="text-muted-foreground">
+            Manage industries, project briefs, and milestones
+          </p>
         </div>
-        <Button>
+        <Button
+          className="cursor-pointer"
+          onClick={() => navigate("/admin/projects/new")}
+        >
           <Plus className="mr-2 h-4 w-4" />
-          Add New
+          Add New Project
         </Button>
       </div>
 
       <Tabs defaultValue="industries" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="industries">Industries</TabsTrigger>
-          <TabsTrigger value="briefs">Project Briefs</TabsTrigger>
-          <TabsTrigger value="milestones">Milestones</TabsTrigger>
+          <TabsTrigger value="industries" className="cursor-pointer">
+            Industries
+          </TabsTrigger>
+          <TabsTrigger value="briefs" className="cursor-pointer">
+            Project Briefs
+          </TabsTrigger>
+          <TabsTrigger value="milestones" className="cursor-pointer">
+            Milestones
+          </TabsTrigger>
         </TabsList>
 
+        {/* Industries Tab */}
         <TabsContent value="industries">
           <Card>
             <CardHeader>
               <CardTitle>Industry Categories</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {industries.map((industry) => (
-                  <Card key={industry.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">{industry.name}</h3>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{industry.description}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Active Projects</span>
-                        <span className="font-medium">{industry.activeProjects}</span>
+              {isPending ? (
+                <p className="text-center">Loading...</p>
+              ) : projects.length ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {Object.entries(
+                    projects.reduce(
+                      (
+                        acc: Record<string, { total: number; active: number }>,
+                        project
+                      ) => {
+                        const industry = project.industry || "—";
+                        if (!acc[industry])
+                          acc[industry] = { total: 0, active: 0 };
+                        acc[industry].total += 1;
+                        if (project.status === "in-progress")
+                          acc[industry].active += 1;
+                        return acc;
+                      },
+                      {}
+                    )
+                  ).map(([industry, stats], i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">{industry}</h3>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0 cursor-pointer"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="cursor-pointer">
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive cursor-pointer">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Total Projects</span>
-                        <span className="font-medium">{industry.totalProjects}</span>
+
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {industry === "—"
+                          ? "No industry information available"
+                          : `Projects in the ${industry} industry`}
+                      </p>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Active Projects</span>
+                          <span className="font-medium">{stats.active}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Total Projects</span>
+                          <span className="font-medium">{stats.total}</span>
+                        </div>
+
+                        <Progress
+                          value={(stats.active / stats.total) * 100}
+                          className="h-2"
+                        />
                       </div>
-                      <Progress 
-                        value={(industry.activeProjects / industry.totalProjects) * 100} 
-                        className="h-2"
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  No projects available.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Project Briefs */}
         <TabsContent value="briefs">
           <Card>
             <CardHeader>
@@ -182,131 +188,181 @@ export function ProjectManagement() {
                     <TableHead>Industry</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead>Difficulty</TableHead>
-                    <TableHead>Active Teams</TableHead>
-                    <TableHead>Completion Rate</TableHead>
+                    <TableHead>Team Size</TableHead>
+                    <TableHead>Milestones</TableHead>
                     <TableHead className="w-[70px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {projectBriefs.map((brief) => (
-                    <TableRow key={brief.id}>
-                      <TableCell className="font-medium">{brief.title}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{brief.industry}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Calendar className="mr-1 h-3 w-3" />
-                          {brief.duration}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={
-                            brief.difficulty === "Beginner" ? "default" : 
-                            brief.difficulty === "Intermediate" ? "secondary" : 
-                            "destructive"
-                          }
-                        >
-                          {brief.difficulty}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{brief.teamsWorking}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Progress value={brief.completionRate} className="w-[60px] h-2" />
-                          <span className="text-sm text-muted-foreground">{brief.completionRate}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSelectedProject(brief.id)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Milestones
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {projects.map((project) => {
+                    const totalMilestones = project.milestones?.length ?? 0;
+                    const completedMilestones =
+                      project.milestones?.filter(
+                        (m) => m.status === "completed"
+                      ).length ?? 0;
+
+                    const completionRate =
+                      totalMilestones > 0
+                        ? Math.round(
+                            (completedMilestones / totalMilestones) * 100
+                          )
+                        : 0;
+
+                    return (
+                      <TableRow key={project._id}>
+                        <TableCell className="font-medium capitalize">
+                          {project.title}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{project.industry}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <Calendar className="mr-1 h-3 w-3" />
+                            {project.duration}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              project.difficulty === "Beginner"
+                                ? "default"
+                                : project.difficulty === "Intermediate"
+                                ? "secondary"
+                                : "destructive"
+                            }
+                          >
+                            {project.difficulty}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{project.teamSize}</TableCell>
+                        <TableCell className="mt-2 flex items-center gap-2">
+                          <Progress
+                            value={completionRate}
+                            className="h-2 w-full"
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {completionRate}%
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="h-8 w-8 p-0 cursor-pointer"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  setSelectedProjectId(project._id)
+                                }
+                                className="cursor-pointer"
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Milestones
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="cursor-pointer">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive cursor-pointer">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Milestones */}
         <TabsContent value="milestones">
           <Card>
             <CardHeader>
               <CardTitle>Project Milestones</CardTitle>
               {selectedProject && (
-                <p className="text-sm text-muted-foreground">
-                  Showing milestones for: {projectBriefs.find(p => p.id === selectedProject)?.title}
+                <p className="text-sm text-muted-foreground capitalize">
+                  Showing milestones for: {selectedProject.title}
                 </p>
               )}
             </CardHeader>
             <CardContent>
               {selectedProject ? (
-                <div className="space-y-4">
-                  {milestones
-                    .filter(m => m.projectId === selectedProject)
-                    .map((milestone) => (
-                    <Card key={milestone.id} className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold">Week {milestone.week}: {milestone.title}</h4>
-                          <Badge className="mt-1">{milestone.status}</Badge>
+                selectedProject.milestones?.length ? (
+                  <div className="space-y-4">
+                    {selectedProject.milestones?.map((milestone, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold capitalize">
+                              Week {milestone.week}: {milestone.title}
+                            </h4>
+                            <Badge className="mt-1 capitalize">
+                              {milestone.status}
+                            </Badge>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="h-8 w-8 p-0 cursor-pointer"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem className="cursor-pointer">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive cursor-pointer">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Expected Deliverables:</p>
-                        <ul className="text-sm space-y-1">
-                          {milestone.deliverables.map((deliverable, index) => (
-                            <li key={index} className="flex items-center">
-                              <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
-                              {deliverable}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Expected Deliverables:
+                          </p>
+                          <ul className="text-sm space-y-1">
+                            {(milestone.deliverables ?? []).map(
+                              (deliverable: string, index: number) => (
+                                <li key={index} className="flex items-center">
+                                  <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
+                                  {deliverable}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                    <p>No milestones found for this project.</p>
+                  </div>
+                )
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Calendar className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                  <p>Select a project from the Project Briefs tab to view its milestones</p>
+                  <p>
+                    Select a project from the Project Briefs tab to view its
+                    milestones
+                  </p>
                 </div>
               )}
             </CardContent>

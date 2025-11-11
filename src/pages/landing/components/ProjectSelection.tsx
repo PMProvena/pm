@@ -167,13 +167,16 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Progress</span>
                         <span className="text-sm">
-                          0/{selectedProject.milestones} milestones
+                          0/{selectedProject.milestones?.length ?? 0} milestones
                         </span>
                       </div>
+
                       <Progress value={0} className="h-2" />
+
                       <p className="text-sm text-muted-foreground">
                         {selectedProject.duration} •{" "}
-                        {selectedProject.milestones} weekly milestones
+                        {selectedProject.milestones?.length ?? 0} weekly
+                        milestones
                       </p>
                     </div>
                   </div>
@@ -228,7 +231,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                       Milestones
                     </span>
                     <span className="text-sm">
-                      {selectedProject.milestones}
+                      {selectedProject.milestones?.length ?? 0}
                     </span>
                   </div>
                 </CardContent>
@@ -366,11 +369,13 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                             {skill}
                           </Badge>
                         ))}
-                      {project.requiredSkills?.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{project.requiredSkills.length - 2} more
-                        </Badge>
-                      )}
+
+                      {project.requiredSkills &&
+                        project.requiredSkills.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{project.requiredSkills.length - 2} more
+                          </Badge>
+                        )}
                     </div>
 
                     <Button

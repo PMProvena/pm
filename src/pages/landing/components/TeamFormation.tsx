@@ -30,21 +30,7 @@ import {
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-
-interface Project {
-  id: string;
-  title: string;
-  industry: string;
-  description: string;
-  duration: string;
-  price: number;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  skills: string[];
-  milestones: number;
-  teamSize: number;
-  icon: React.ReactNode;
-  objectives: string[];
-}
+import type { Project } from "@/api/interfaces/projects";
 
 interface TeamMember {
   id: string;
@@ -218,7 +204,7 @@ export function TeamFormation({
     }
   };
 
-  const isTeamComplete = project?.skills?.every(
+  const isTeamComplete = project?.requiredSkills?.every(
     (skill) => selectedMembers[skill]
   );
 
@@ -270,7 +256,7 @@ export function TeamFormation({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    {project?.skills?.map((skill) => (
+                    {project?.requiredSkills?.map((skill) => (
                       <div
                         key={skill}
                         className="flex items-center justify-between"
@@ -293,20 +279,22 @@ export function TeamFormation({
                       <span>Team Formation</span>
                       <span>
                         {Object.keys(selectedMembers)?.length}/
-                        {project.skills?.length}
+                        {project.requiredSkills?.length}
                       </span>
                     </div>
                     <div className="bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{
-                          width: `${
-                            (Object.keys(selectedMembers)?.length /
-                              project.skills?.length) *
-                            100
-                          }%`,
-                        }}
-                      />
+                      {project.requiredSkills && (
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all"
+                          style={{
+                            width: `${
+                              (Object.keys(selectedMembers).length /
+                                project.requiredSkills.length) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -364,7 +352,7 @@ export function TeamFormation({
 
             {/* Available Members */}
             <div className="lg:col-span-3 space-y-8">
-              {project?.skills?.map((skill) => (
+              {project?.requiredSkills?.map((skill) => (
                 <div key={skill}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">

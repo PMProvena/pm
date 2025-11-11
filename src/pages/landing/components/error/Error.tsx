@@ -14,7 +14,7 @@ const Error: React.FC<ErrorProps> = ({ refetchData }) => {
       <p className="text-muted-foreground">
         Failed to load projects. Please try again.
       </p>
-      <Button onClick={refetchData}>Retry</Button>
+      <Button onClick={refetchData} className="cursor-pointer">Retry</Button>
     </div>
   );
 };

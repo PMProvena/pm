@@ -21,21 +21,9 @@ import { Label } from "./ui/label";
 import { Progress } from "./ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Textarea } from "./ui/textarea";
+import type { Project } from "@/api/interfaces/projects";
 
-interface Project {
-  id: string;
-  title: string;
-  industry: string;
-  description: string;
-  duration: string;
-  price: number;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  skills: string[];
-  milestones: number;
-  teamSize: number;
-  icon: React.ReactNode;
-  objectives: string[];
-}
+
 
 interface Milestone {
   id: string;

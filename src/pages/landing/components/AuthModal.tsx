@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -25,10 +25,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   initialTab: "login" | "signup";
-  onAuthSuccess: (user: any) => void;
+  onAuthSuccess?: (user: any) => void;
   hideSignup?: boolean;
 }
 
@@ -96,7 +96,7 @@ AuthModalProps) {
         },
         {
           onSuccess: () => {
-            onClose();
+            onClose?.();
             navigate("/projects");
           },
         }
@@ -109,8 +109,24 @@ AuthModalProps) {
         },
         {
           onSuccess: () => {
-            onClose();
-            navigate("/dashboard");
+            onClose?.();
+
+            const userDetails = JSON.parse(
+              localStorage.getItem("userDetails") || "null"
+            );
+            const role = userDetails?.data?.role;
+
+            if (role === "admin") {
+              navigate("/admin");
+            } else if (role === "pm") {
+              navigate("/dashboard");
+            } else if (role === "mentor") {
+              navigate("/mentor");
+            } else if (role === "skilled") {
+              navigate("/skilled-member");
+            } else {
+              navigate("/");
+            }
           },
         }
       );
@@ -124,7 +140,7 @@ AuthModalProps) {
       open={isOpen}
       onOpenChange={() => {
         if (!hideSignup) {
-          onClose(); // only allow closing if hideSignup is false
+          onClose?.(); // only allow closing if hideSignup is false
         }
       }}
     >
