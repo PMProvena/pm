@@ -1,4 +1,4 @@
-import type { Project, ProjectSelectionProps } from "@/api/interfaces/projects";
+import type { Project } from "@/api/interfaces/projects";
 import { PayButton } from "@/components/PayButton";
 import { useGetProjects } from "@/hooks/projects/useGetProjects";
 import {
@@ -13,7 +13,9 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import Error from "./error/Error";
+import ProjectsSkeletonLoader from "./loader/ProjectsSkeletonLoader";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -24,12 +26,13 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Progress } from "./ui/progress";
-import Error from "./error/Error";
-import ProjectsSkeletonLoader from "./loader/ProjectsSkeletonLoader";
 
-export function ProjectSelection({ user }: ProjectSelectionProps) {
+export function ProjectSelection() {
+  const user = JSON.parse(localStorage.getItem("userDetails") || "null");
   console.log("user", user);
-  const nav = useNavigate();
+  // const signupEmail = localStorage?.getItem("signupEmail") || "";
+  // console.log("user", signupEmail);
+  // const nav = useNavigate();
 
   const {
     data: allProjects,
@@ -96,9 +99,9 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
     }
   };
 
-  const onBack = () => {
-    nav("/dashboard");
-  };
+  // const onBack = () => {
+  //   nav("/dashboard");
+  // };
 
   if (isError) return <Error refetchData={refetchProjects} />;
 
@@ -143,7 +146,7 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                     <ul className="space-y-2">
                       {selectedProject?.objectives?.map((objective, index) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 shrink-0" />
                           <span className="text-sm">{objective}</span>
                         </li>
                       ))}
@@ -244,19 +247,22 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                 <CardContent>
                   <div className="text-center space-y-4">
                     <div>
-                      <span className="text-3xl">₦{selectedProject.price}</span>
+                      <span className="text-3xl">
+                        ₦{selectedProject.price.toLocaleString()}
+                      </span>
                       <span className="text-muted-foreground">/ project</span>
                     </div>
                     {/* <Button className="w-full cursor-pointer" size="lg">
                       <DollarSign className="h-4 w-4 mr-2" />
                       Start This Project
                     </Button> */}
+                    {/*  */}
                     {user && selectedProject && (
                       <PayButton
-                        email={user.data.email}
+                        email={user.data.email }
                         amount={selectedProject.price}
                         projectId={selectedProject._id}
-                        userId={user.data.userId}
+                        userId={user.data.userId || user.data.id}
                       >
                         {/* <DollarSign className="h-4 w-4 mr-2" /> */}
                         {/* ₦  */}
@@ -281,13 +287,13 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <Button
+          {/* <Button
             variant="ghost"
             onClick={onBack}
             className="mb-4 cursor-pointer"
           >
             ← Back to Dashboard
-          </Button>
+          </Button> */}
           <h1 className="text-3xl mb-2">Choose Your Project</h1>
           <p className="text-muted-foreground">
             Select an industry-specific project to start building real-world PM
@@ -354,7 +360,9 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
                       <Badge className={getDifficultyColor(project.difficulty)}>
                         {project.difficulty}
                       </Badge>
-                      <span className="text-lg">₦{project.price}</span>
+                      <span className="text-lg">
+                        ₦{project.price.toLocaleString()}
+                      </span>
                     </div>
 
                     <div className="flex flex-wrap gap-1">
@@ -392,13 +400,13 @@ export function ProjectSelection({ user }: ProjectSelectionProps) {
           </>
         )}
 
-        {!filteredProjects.length && (
+        {/* {!filteredProjects.length   && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               No projects found for the selected industry.
             </p>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

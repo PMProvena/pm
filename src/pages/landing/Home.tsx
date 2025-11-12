@@ -1,30 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { AuthModal } from "./components/AuthModal";
 import { LandingPage } from "./components/LandingPage";
-
-import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalType, setAuthModalType] = useState<"login" | "signup">(
     "signup"
   );
-  const navigate = useNavigate();
 
   const handleAuthClick = (type: "login" | "signup") => {
     setAuthModalType(type);
     setAuthModalOpen(true);
-  };
-
-  const handleAuthSuccess = (userData: any) => {
-    localStorage.setItem("userDetails", JSON.stringify(userData));
-
-    // redirect based on user role
-    if (userData.role === "pm") navigate("/dashboard");
-    else if (userData.role === "admin") navigate("/admin");
-    else if (userData.role === "mentor") navigate("/mentor");
-    else if (userData.role === "skilled") navigate("/skilled-member");
   };
 
   // const handleAuthClick = (type: "login" | "signup") => {
@@ -100,7 +86,6 @@ export default function HomePage() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialTab={authModalType}
-        onAuthSuccess={handleAuthSuccess}
       />
     </>
   );

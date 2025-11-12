@@ -174,8 +174,27 @@ export default function AddNewUser() {
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mentor">Mentor</SelectItem>
-                  <SelectItem value="skilled-member">Skilled Member</SelectItem>
+                  <SelectContent>
+                    <SelectItem value="mentor">Mentor</SelectItem>
+                    <SelectItem value="Product Designer">
+                      Product Designer
+                    </SelectItem>
+                    <SelectItem value="Fullstack Developer">
+                      Fullstack Developer
+                    </SelectItem>
+                    <SelectItem value="Frontend Developer">
+                      Frontend Developer
+                    </SelectItem>
+                    <SelectItem value="Backend Developer">
+                      Backend Developer
+                    </SelectItem>
+                    <SelectItem value="Mobile App Developer">
+                      Mobile App Developer
+                    </SelectItem>
+                    <SelectItem value="DevOps Engineer">
+                      DevOps Engineer
+                    </SelectItem>
+                  </SelectContent>
                 </SelectContent>
               </Select>
             </div>

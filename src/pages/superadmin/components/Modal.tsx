@@ -21,7 +21,7 @@ export function Modal({
         <p className="text-gray-600">{message}</p>
         <Button
           onClick={() => navigate("/admin/users")}
-          className="mt-4 w-auto"
+          className="mt-4 w-auto cursor-pointer"
         >
           Back to User Management
         </Button>

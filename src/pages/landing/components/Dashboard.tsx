@@ -1,4 +1,3 @@
-import type { DashboardProps } from "@/api/interfaces/dashboard";
 import { useGetDashboard } from "@/hooks/projects/useGetDashboard";
 import {
   Award,
@@ -17,8 +16,6 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Error from "./error/Error";
 import DashboardSkeletonLoader from "./loader/DashboardSkeletonLoader";
-import { ProjectDashboard } from "./ProjectDashboard";
-import { TeamFormation } from "./TeamFormation";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -32,59 +29,26 @@ import {
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useGetMyProjects } from "@/hooks/projects/useGetMyProjects";
 
-// const currentProject: Project = {
-//   id: "12345",
-//   _id: "12345", // ✅ added
-//   title: "AI-Powered Customer Support Chatbot",
-//   industry: "Technology",
-//   description:
-//     "Build an AI-driven chatbot that can handle real-time customer queries, provide automated responses, and escalate complex issues to human agents. The project involves integrating NLP models and a user-friendly dashboard for monitoring performance.",
-//   duration: "8 weeks",
-//   price: 1500,
-//   difficulty: "Intermediate",
-//   skills: [
-//     "UI/UX Designer",
-//     "Frontend Developer",
-//     "Backend Developer",
-//     "Mobile Developer",
-//   ],
-//   requiredSkills: [
-//     "UI/UX Designer",
-//     "Frontend Developer",
-//     "Backend Developer",
-//     "Mobile Developer",
-//   ],
-//   milestones: 5,
-//   teamSize: 4,
-//   icon: (
-//     <span role="img" aria-label="robot">
-//       🤖
-//     </span>
-//   ),
-//   objectives: [
-//     "Design and build the chatbot UI",
-//     "Implement NLP model integration",
-//     "Develop backend APIs for chat management",
-//     "Create analytics dashboard for monitoring",
-//     "Deploy chatbot to production environment",
-//   ],
-// };
-
-export function Dashboard({ user }: DashboardProps) {
+export function Dashboard() {
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
   console.log("user", user);
   // export function Dashboard({ user, currentProject, onStartNewProject }: DashboardProps) {
   const nav = useNavigate();
 
   const { data, isPending, isError, refetch: refetchData } = useGetDashboard();
 
-  const { data: MyProjects } = useGetMyProjects();
-  console.log("MyProjects", MyProjects);
+  // const { data: MyProjects } = useGetMyProjects();
+  // console.log("MyProjects", MyProjects);
 
-  const currentProject = data?.data?.myProjects?.[0] ?? null;
+  const myProjectsArray = data?.data?.myProjects
+    ? Object.values(data.data.myProjects)
+    : [];
+
+  const currentProject = myProjectsArray[0] ?? null;
 
   console.log("Dashboard data:", data);
+  console.log("currentProject", currentProject);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [projectPhase, setProjectPhase] = useState<
@@ -96,7 +60,7 @@ export function Dashboard({ user }: DashboardProps) {
     totalProjects: data?.data?.projects ?? 0,
     completedMilestones: data?.data?.milestones?.completed ?? 0,
     totalMilestones: data?.data?.milestones?.total ?? 0,
-    points: data?.data?.points ?? 0,
+    points: data?.data?.pointsEarned?.value ?? 0,
     certificatesEarned: data?.data?.certificates ?? 0,
     profileCompletion: data?.data?.profileCompletion ?? 0,
     pointsPeriod: data?.data?.pointsEarned?.period ?? "",
@@ -138,6 +102,16 @@ export function Dashboard({ user }: DashboardProps) {
       nav("/projects");
     }
   }, [data, isPending, nav]);
+
+  useEffect(() => {
+    if (activeTab === "project" && currentProject) {
+      if (projectPhase === "team-formation") {
+        nav("/build-your-team", { state: { project: currentProject } });
+      } else if (projectPhase === "active") {
+        nav("/project-phase", { state: { project: currentProject } });
+      }
+    }
+  }, [activeTab, projectPhase, currentProject, nav]);
 
   if (isError) return <Error refetchData={refetchData} />;
 
@@ -196,6 +170,7 @@ export function Dashboard({ user }: DashboardProps) {
                       onClick={() => {
                         setShowDropdown(false);
                         localStorage.removeItem("userDetails");
+                        localStorage.removeItem("pmUserToken");
                         nav("/");
                         toast.success("Logged out successfully!");
                       }}
@@ -244,7 +219,9 @@ export function Dashboard({ user }: DashboardProps) {
                     <div>
                       <CardTitle className="text-lg">
                         {user
-                          ? `${user.data.firstName} ${user.data.lastName}`
+                          ? `${user.data.firstName || user.data.firstname} ${
+                              user.data.lastName || user.data.lastname
+                            }`
                           : "Guest"}
                       </CardTitle>
                       <CardDescription className="uppercase">
@@ -340,7 +317,9 @@ export function Dashboard({ user }: DashboardProps) {
                         <Target className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl">{data.data.activeProjects ?? 0}</div>
+                        <div className="text-2xl">
+                          {data.data.activeProjects ?? 0}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {currentProject
                             ? "In progress"
@@ -403,7 +382,17 @@ export function Dashboard({ user }: DashboardProps) {
                             </Badge>
                           </div>
                           <Button
-                            onClick={() => setActiveTab("project")}
+                            onClick={() => {
+                              if (projectPhase === "team-formation") {
+                                nav("/build-your-team", {
+                                  state: { project: currentProject },
+                                });
+                              } else {
+                                nav("/project-phase", {
+                                  state: { project: currentProject },
+                                });
+                              }
+                            }}
                             className="cursor-pointer"
                           >
                             View Project
@@ -529,63 +518,61 @@ export function Dashboard({ user }: DashboardProps) {
                 {/* Current Project Tab*/}
                 <TabsContent value="project" className="space-y-6">
                   {currentProject ? (
-                    projectPhase === "team-formation" ? (
-                      <TeamFormation
-                        project={currentProject}
-                        onTeamComplete={() => setProjectPhase("active")}
-                        onBack={() => setActiveTab("overview")}
-                      />
-                    ) : projectPhase === "active" ? (
-                      <ProjectDashboard
-                        project={currentProject}
-                        onBack={() => setActiveTab("overview")}
-                      />
-                    ) : (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Project Workspace</CardTitle>
-                          <CardDescription>
-                            Manage your current project and team
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="text-lg mb-1">
-                                  {currentProject.title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  {currentProject.industry}
-                                </p>
-                                <p className="text-sm">
-                                  {currentProject.description}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex space-x-4">
-                              <Button
-                                onClick={() =>
-                                  setProjectPhase("team-formation")
-                                }
-                              >
-                                <Users className="h-4 w-4 mr-2" />
-                                Manage Team
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => setProjectPhase("active")}
-                              >
-                                <Calendar className="h-4 w-4 mr-2" />
-                                View Milestones
-                              </Button>
+                    // projectPhase === "team-formation" ? (
+                    //   <TeamFormation
+                    //     project={currentProject}
+                    //     onTeamComplete={() => setProjectPhase("active")}
+                    //     onBack={() => setActiveTab("overview")}
+                    //   />
+                    // ) : projectPhase === "active" ? (
+                    //   <ProjectDashboard
+                    //     project={currentProject}
+                    //     onBack={() => setActiveTab("overview")}
+                    //   />
+                    // ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Project Workspace</CardTitle>
+                        <CardDescription>
+                          Manage your current project and team
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg mb-1">
+                                {currentProject.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {currentProject.industry}
+                              </p>
+                              <p className="text-sm">
+                                {currentProject.description}
+                              </p>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    )
+
+                          <div className="flex space-x-4">
+                            <Button
+                              onClick={() => setProjectPhase("team-formation")}
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Manage Team
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setProjectPhase("active")}
+                            >
+                              <Calendar className="h-4 w-4 mr-2" />
+                              View Milestones
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ) : (
+                    // )
                     <Card>
                       <CardHeader>
                         <CardTitle>No Active Project</CardTitle>

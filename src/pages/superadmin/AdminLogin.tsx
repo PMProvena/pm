@@ -32,7 +32,7 @@ export default function AdminLogin() {
           if (role === "admin") navigate("/admin");
           else if (role === "pm") navigate("/dashboard");
           else if (role === "mentor") navigate("/mentor");
-          else if (role === "skilled") navigate("/skilled-member");
+          else if (role === "skilled-member") navigate("/skilled-member");
           else navigate("/");
         },
       }

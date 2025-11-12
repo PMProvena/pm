@@ -50,10 +50,17 @@ export function UserManagement() {
 
     return AllUsers.data.reduce(
       (acc: any, user: any) => {
-        const role = user.role;
+        let role = user.role;
+
+        // Default unknown roles to "skilled-member"
+        if (!["pm", "mentor", "skilled-member"].includes(role)) {
+          role = "skilled-member";
+        }
+
         if (role === "pm") acc.pm.push(user);
         else if (role === "mentor") acc.mentor.push(user);
         else if (role === "skilled-member") acc["skilled-member"].push(user);
+
         return acc;
       },
       { pm: [], mentor: [], "skilled-member": [] }
@@ -143,7 +150,7 @@ export function UserManagement() {
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.active_projects || "---"}</TableCell>
                           <TableCell>
-                             {user.status || "---"}
+                            {user.status || "---"}
                             {/* <Badge variant="default">
                               {user.status || "---"}
                             </Badge> */}
@@ -226,7 +233,7 @@ export function UserManagement() {
                               : "---"}
                           </TableCell>
                           <TableCell>
-                             {user.status || "---"}
+                            {user.status || "---"}
                             {/* <Badge variant="default">
                               {user.status || "---"}
                             </Badge> */}
@@ -304,7 +311,7 @@ export function UserManagement() {
                               {user.active_projects || "---"}
                             </TableCell>
                             <TableCell>
-                               {user.status || "---"}
+                              {user.status || "---"}
                               {/* <Badge variant="default">
                                 {user.status || "---"}
                               </Badge> */}

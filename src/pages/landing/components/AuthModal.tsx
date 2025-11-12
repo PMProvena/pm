@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useLogin, useRegister } from "@/hooks/auth/useAuth";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
@@ -28,7 +27,6 @@ interface AuthModalProps {
   isOpen?: boolean;
   onClose?: () => void;
   initialTab: "login" | "signup";
-  onAuthSuccess?: (user: any) => void;
   hideSignup?: boolean;
 }
 
@@ -37,8 +35,7 @@ export function AuthModal({
   onClose,
   initialTab,
   hideSignup,
-}: // onAuthSuccess,
-AuthModalProps) {
+}: AuthModalProps) {
   // const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const loginMutation = useLogin();
@@ -96,6 +93,9 @@ AuthModalProps) {
         },
         {
           onSuccess: () => {
+            // Save the signup email to localStorage
+            localStorage.setItem("signupEmail", formData.email);
+
             onClose?.();
             navigate("/projects");
           },
@@ -108,24 +108,26 @@ AuthModalProps) {
           password: formData.password,
         },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
+            console.log("login data", data);
             onClose?.();
 
-            const userDetails = JSON.parse(
-              localStorage.getItem("userDetails") || "null"
-            );
-            const role = userDetails?.data?.role;
+            let role = data?.data?.role;
 
+            // Default to skilled-member if role is not admin, pm, or mentor
+            if (!["admin", "pm", "mentor"].includes(role)) {
+              role = "skilled-member";
+            }
+
+            // Redirect based on role
             if (role === "admin") {
               navigate("/admin");
             } else if (role === "pm") {
               navigate("/dashboard");
             } else if (role === "mentor") {
               navigate("/mentor");
-            } else if (role === "skilled") {
+            } else if (role === "skilled-member") {
               navigate("/skilled-member");
-            } else {
-              navigate("/");
             }
           },
         }

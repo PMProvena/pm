@@ -19,25 +19,27 @@ import { TeamOversight } from "@/pages/superadmin/components/TeamOversight";
 import { UserManagement } from "@/pages/superadmin/components/UserManagement";
 import CreateProjectForm from "@/pages/superadmin/components/CreateProjectForm";
 import AddNewUser from "@/pages/superadmin/components/AddNewUser";
-
-const user = JSON.parse(localStorage.getItem("userDetails") || "null");
-console.log("user", user);
+import { TeamFormation } from "@/pages/landing/components/TeamFormation";
+import { ProjectDashboard } from "@/pages/landing/components/ProjectDashboard";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/projects" element={<ProjectSelection user={user} />} />
+      <Route path="/projects" element={<ProjectSelection />} />
+      <Route path="/build-your-team" element={<TeamFormation />} />
+      <Route path="/project-phase" element={<ProjectDashboard />} />
+
       <Route path="/payment" element={<PaymentFlow />} />
 
       {/* Protected Routes (Role-Based) */}
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute allowedRoles={["pm"]}>
-            <Dashboard user={user} />
-          </ProtectedRoute>
+          // <ProtectedRoute allowedRoles={["pm"]}>
+          <Dashboard />
+          // </ProtectedRoute>
         }
       />
 
@@ -76,7 +78,7 @@ export default function AppRoutes() {
       <Route
         path="/skilled-member"
         element={
-          <ProtectedRoute allowedRoles={["skilled"]}>
+          <ProtectedRoute allowedRoles={["skilled-member"]}>
             <SkilledMemberDashboard />
           </ProtectedRoute>
         }

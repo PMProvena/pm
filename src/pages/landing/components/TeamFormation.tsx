@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetNonPM } from "@/hooks/users/useGetNonPM";
 import {
   Award,
   CheckCircle,
@@ -11,6 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Error from "./error/Error";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -30,7 +34,7 @@ import {
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import type { Project } from "@/api/interfaces/projects";
+import { useAssignUsers } from "@/hooks/users/useAssignUsers";
 
 interface TeamMember {
   id: string;
@@ -44,22 +48,42 @@ interface TeamMember {
   bio: string;
 }
 
-interface TeamFormationProps {
-  project: Project;
-  onTeamComplete: () => void;
-  onBack: () => void;
-}
+// interface TeamFormationProps {
+//   project: Project;
+//   onTeamComplete: () => void;
+//   onBack: () => void;
+// }
 
-export function TeamFormation({
-  project,
-  onTeamComplete,
-  onBack,
-}: TeamFormationProps) {
+export function TeamFormation() {
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
+  console.log("user", user);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const project = location.state?.project;
   console.log("current project", project);
+
+  const {
+    data: AllNonPM,
+    isPending,
+    isError,
+    refetch: refetchUsers,
+  } = useGetNonPM() as {
+    data?: any;
+    isPending: boolean;
+    isError: boolean;
+    refetch: () => void;
+  };
+
+  const { mutate: assignUsers, isPending: isAssigning } = useAssignUsers(
+    project?._id
+  );
+
+  console.log("AllNonPM", AllNonPM);
 
   const [selectedMembers, setSelectedMembers] = useState<{
     [key: string]: TeamMember;
   }>({});
+  console.log("selectedMembers", selectedMembers);
   const [showRemovalDialog, setShowRemovalDialog] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{
     role: string;
@@ -67,102 +91,50 @@ export function TeamFormation({
   } | null>(null);
   const [removalReason, setRemovalReason] = useState("");
 
-  // Mock available team members
-  const availableMembers: { [key: string]: TeamMember[] } = {
-    "UI/UX Designer": [
-      {
-        id: "1",
-        name: "Sarah Chen",
-        role: "UI/UX Designer",
-        experience: "Intermediate",
-        rating: 4.8,
-        completedProjects: 12,
-        skills: ["Figma", "Adobe XD", "User Research", "Prototyping"],
-        bio: "Passionate about creating user-centered designs with 3+ years of experience in digital products.",
-      },
-      {
-        id: "2",
-        name: "Alex Rivera",
-        role: "UI/UX Designer",
-        experience: "Beginner",
-        rating: 4.5,
-        completedProjects: 6,
-        skills: ["Sketch", "InVision", "Wireframing", "User Testing"],
-        bio: "Recent design bootcamp graduate eager to work on real-world projects and learn from experienced teams.",
-      },
-      {
-        id: "3",
-        name: "Jordan Kim",
-        role: "UI/UX Designer",
-        experience: "Advanced",
-        rating: 4.9,
-        completedProjects: 25,
-        skills: [
-          "Figma",
-          "Adobe Creative Suite",
-          "Design Systems",
-          "Accessibility",
-        ],
-        bio: "Senior designer with expertise in enterprise design systems and accessibility standards.",
-      },
-    ],
-    "Frontend Developer": [
-      {
-        id: "4",
-        name: "Marcus Thompson",
-        role: "Frontend Developer",
-        experience: "Intermediate",
-        rating: 4.7,
-        completedProjects: 15,
-        skills: ["React", "TypeScript", "Tailwind CSS", "Next.js"],
-        bio: "Full-stack developer specializing in React applications with a focus on performance and user experience.",
-      },
-      {
-        id: "5",
-        name: "Emily Watson",
-        role: "Frontend Developer",
-        experience: "Beginner",
-        rating: 4.3,
-        completedProjects: 8,
-        skills: ["HTML", "CSS", "JavaScript", "Vue.js"],
-        bio: "Junior developer passionate about clean code and modern frontend technologies.",
-      },
-    ],
-    "Backend Developer": [
-      {
-        id: "6",
-        name: "David Park",
-        role: "Backend Developer",
-        experience: "Advanced",
-        rating: 4.9,
-        completedProjects: 22,
-        skills: ["Node.js", "Python", "PostgreSQL", "AWS"],
-        bio: "Senior backend engineer with expertise in scalable architecture and cloud infrastructure.",
-      },
-      {
-        id: "7",
-        name: "Lisa Zhang",
-        role: "Backend Developer",
-        experience: "Intermediate",
-        rating: 4.6,
-        completedProjects: 11,
-        skills: ["Express.js", "MongoDB", "Redis", "Docker"],
-        bio: "Backend developer focused on API design and database optimization.",
-      },
-    ],
-    "Mobile Developer": [
-      {
-        id: "8",
-        name: "Ryan Foster",
-        role: "Mobile Developer",
-        experience: "Intermediate",
-        rating: 4.5,
-        completedProjects: 9,
-        skills: ["React Native", "iOS", "Android", "Firebase"],
-        bio: "Mobile developer experienced in cross-platform development and native iOS/Android apps.",
-      },
-    ],
-  };
+  // Filter API data to exclude "skilled-member"
+  const filteredMembers =
+    AllNonPM?.data?.filter((member: any) => member.role !== "skilled-member") ||
+    [];
+
+  // Group members by role for your Select/Cards
+  const membersByRole: { [key: string]: TeamMember[] } = {};
+
+  // Normalize all roles to lowercase for consistency and then capitalize
+  const normalizedRequiredSkills = (project?.requiredSkills || []).map(
+    (skill: any) => skill.charAt(0).toUpperCase() + skill.slice(1).toLowerCase()
+  );
+
+  const rolesToInclude = new Set([
+    ...normalizedRequiredSkills,
+    ...(filteredMembers.some((m: any) => m.role.toLowerCase() === "mentor")
+      ? ["Mentor"]
+      : []),
+  ]);
+
+  // Also update the normalizeRole helper function if you're using it
+  const normalizeRole = (role: string) => role.toLowerCase().trim();
+
+  rolesToInclude.forEach((role: string) => {
+    membersByRole[role] = filteredMembers
+      .filter(
+        (member: any) => normalizeRole(member.role) === normalizeRole(role)
+      )
+      .map((member: any) => ({
+        id: member._id,
+        name: `${member.first_name} ${member.last_name}`,
+        role:
+          member.role.charAt(0).toUpperCase() +
+          member.role.slice(1).toLowerCase(), // Capitalize display
+        experience: member.experience_level || "N/A",
+        rating: member.points || 0,
+        completedProjects: member.completed_projects || 0,
+        skills:
+          member.skills && member.skills.length > 0
+            ? member.skills
+            : ["No skills set"],
+        bio: member.description || "No bio set",
+      }));
+  });
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -204,9 +176,32 @@ export function TeamFormation({
     }
   };
 
-  const isTeamComplete = project?.requiredSkills?.every(
-    (skill) => selectedMembers[skill]
+  const handleAssignUsers = () => {
+    const assignedUserIds = Object.values(selectedMembers).map((member) =>
+      Number(member.id)
+    );
+
+    assignUsers(
+      { assigned_users: assignedUserIds },
+      {
+        onSuccess: (res) => {
+          console.log("Users assigned successfully:", res);
+          // Optionally navigate or refetch data
+          navigate("/project-phase", { state: { project } });
+        },
+      }
+    );
+  };
+
+  const isTeamComplete = project?.requiredSkills?.every((skill: any) =>
+    Object.keys(selectedMembers)
+      .map((key) => key.toLowerCase().trim())
+      .includes(skill.toLowerCase().trim())
   );
+
+  console.log("isTeamComplete", isTeamComplete);
+
+  if (isError) return <Error refetchData={refetchUsers} />;
 
   if (!project) {
     return (
@@ -219,7 +214,7 @@ export function TeamFormation({
         </p>
         <Button
           variant="ghost"
-          onClick={onBack}
+          // onClick={onBack}
           className="mt-6 cursor-pointer"
         >
           ← Back to Dashboard
@@ -234,7 +229,7 @@ export function TeamFormation({
         <div className="max-w-6xl mx-auto">
           <Button
             variant="ghost"
-            onClick={onBack}
+            onClick={() => navigate("/dashboard")}
             className="mb-6 cursor-pointer"
           >
             ← Back to Dashboard
@@ -247,144 +242,97 @@ export function TeamFormation({
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
-            {/* Team Overview */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Team Progress</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    {project?.requiredSkills?.map((skill) => (
-                      <div
-                        key={skill}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center space-x-2">
-                          {getRoleIcon(skill)}
-                          <span className="text-sm">{skill}</span>
-                        </div>
-                        {selectedMembers[skill] ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <div className="h-4 w-4 border-2 border-muted rounded-full" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Team Formation</span>
-                      <span>
-                        {Object.keys(selectedMembers)?.length}/
-                        {project.requiredSkills?.length}
-                      </span>
-                    </div>
-                    <div className="bg-muted rounded-full h-2">
-                      {project.requiredSkills && (
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all"
-                          style={{
-                            width: `${
-                              (Object.keys(selectedMembers).length /
-                                project.requiredSkills.length) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {isTeamComplete && (
-                    <Button className="w-full" onClick={onTeamComplete}>
-                      <Users className="h-4 w-4 mr-2" />
-                      Complete Team Formation
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Selected Team Members */}
-              {Object.keys(selectedMembers).length > 0 && (
+          {isPending ? (
+            <p className="text-center">Loading...</p>
+          ) : (
+            <div className="grid lg:grid-cols-4 gap-8">
+              {/* Team Overview */}
+              <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Selected Team</CardTitle>
+                    <CardTitle className="text-lg">Team Progress</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    {Object.entries(selectedMembers)?.map(([role, member]) => (
-                      <div
-                        key={role}
-                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {member.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {role}
-                            </p>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      {project?.requiredSkills?.map((skill: any) => {
+                        const skillKey = skill.toLowerCase().trim();
+                        const isSelected = Object.keys(selectedMembers)
+                          .map((key) => key.toLowerCase().trim())
+                          .includes(skillKey);
+
+                        return (
+                          <div
+                            key={skill}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center space-x-2">
+                              {getRoleIcon(skill)}
+                              <span className="text-sm">{skill}</span>
+                            </div>
+                            {isSelected ? (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <div className="h-4 w-4 border-2 border-muted rounded-full" />
+                            )}
                           </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleRemoveMember(role, member)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Team Formation</span>
+                        <span>
+                          {Object.keys(selectedMembers)?.length}/
+                          {project.requiredSkills?.length}
+                        </span>
                       </div>
-                    ))}
+                      <div className="bg-muted rounded-full h-2">
+                        {project.requiredSkills && (
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{
+                              width: `${
+                                (Object.keys(selectedMembers).length /
+                                  project.requiredSkills.length) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {isTeamComplete && (
+                      <Button
+                        className="w-full cursor-pointer"
+                        onClick={handleAssignUsers}
+                      >
+                        <Users className="h-4 w-4" />
+                        {isAssigning
+                          ? "Completing..."
+                          : " Complete Team Formation"}
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
-              )}
-            </div>
 
-            {/* Available Members */}
-            <div className="lg:col-span-3 space-y-8">
-              {project?.requiredSkills?.map((skill) => (
-                <div key={skill}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
-                      {getRoleIcon(skill)}
-                      <h2 className="text-xl">{skill}</h2>
-                      {selectedMembers[skill] && (
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 border-green-200"
-                        >
-                          Selected
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {availableMembers[skill]?.map((member) => (
-                      <Card
-                        key={member.id}
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedMembers[skill]?.id === member.id
-                            ? "ring-2 ring-primary bg-primary/5"
-                            : ""
-                        }`}
-                        onClick={() => handleSelectMember(skill, member)}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
+                {/* Selected Team Members */}
+                {Object.keys(selectedMembers).length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Selected Team</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {Object.entries(selectedMembers)?.map(
+                        ([role, member]) => (
+                          <div
+                            key={role}
+                            className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                          >
                             <div className="flex items-center space-x-3">
-                              <Avatar>
-                                <AvatarFallback>
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="text-xs">
                                   {member.name
                                     .split(" ")
                                     .map((n) => n[0])
@@ -392,59 +340,126 @@ export function TeamFormation({
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <CardTitle className="text-base">
-                                  {member.name}
-                                </CardTitle>
-                                <CardDescription className="text-sm">
-                                  {member.experience}
-                                </CardDescription>
+                                <p className="text-sm">{member.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {role}
+                                </p>
                               </div>
                             </div>
-                            {selectedMembers[skill]?.id === member.id && (
-                              <CheckCircle className="h-5 w-5 text-primary" />
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleRemoveMember(role, member)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
                           </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {member.bio}
-                          </p>
+                        )
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
 
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center space-x-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{member.rating}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Award className="h-3 w-3 text-muted-foreground" />
-                              <span>{member.completedProjects} projects</span>
-                            </div>
-                          </div>
+              {/* Available Members */}
+              <div className="lg:col-span-3 space-y-8">
+                {Object.keys(membersByRole)?.map((role: string) => (
+                  <div key={role}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-2">
+                        {getRoleIcon(role)}
+                        <h2 className="text-xl">{role}</h2>
+                        {selectedMembers[role] && (
+                          <Badge
+                            variant="outline"
+                            className="bg-green-50 text-green-700 border-green-200"
+                          >
+                            Selected
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
 
-                          <div className="flex flex-wrap gap-1">
-                            {member.skills.slice(0, 3)?.map((skill, index) => (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {skill}
-                              </Badge>
-                            ))}
-                            {member.skills.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{member.skills.length - 3}
-                              </Badge>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {membersByRole[role]?.map((member) => (
+                        <Card
+                          key={member.id}
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            selectedMembers[role]?.id === member.id
+                              ? "ring-2 ring-primary bg-primary/5"
+                              : ""
+                          }`}
+                          onClick={() => handleSelectMember(role, member)}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center space-x-3">
+                                <Avatar>
+                                  <AvatarFallback>
+                                    {member.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <CardTitle className="text-base">
+                                    {member.name}
+                                  </CardTitle>
+                                  <CardDescription className="text-sm">
+                                    {member.experience}
+                                  </CardDescription>
+                                </div>
+                              </div>
+                              {selectedMembers[role]?.id === member.id && (
+                                <CheckCircle className="h-5 w-5 text-primary" />
+                              )}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {member.bio}
+                            </p>
+
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center space-x-1">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                <span>{member.rating}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Award className="h-3 w-3 text-muted-foreground" />
+                                <span>{member.completedProjects} projects</span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-1">
+                              {member.skills
+                                .slice(0, 3)
+                                ?.map((skill, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              {member.skills.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{member.skills.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
