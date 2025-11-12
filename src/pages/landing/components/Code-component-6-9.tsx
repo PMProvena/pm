@@ -109,9 +109,9 @@ export function Dashboard({
     if (projectPhase === "team-formation") {
       return (
         <TeamFormation
-          project={currentProject}
-          onTeamComplete={() => setProjectPhase("active")}
-          onBack={() => setActiveTab("overview")}
+          // project={currentProject}
+          // onTeamComplete={() => setProjectPhase("active")}
+          // onBack={() => setActiveTab("overview")}
         />
       );
     }
@@ -119,8 +119,8 @@ export function Dashboard({
     if (projectPhase === "active") {
       return (
         <ProjectDashboard
-          project={currentProject}
-          onBack={() => setActiveTab("overview")}
+          // project={currentProject}
+          // onBack={() => setActiveTab("overview")}
         />
       );
     }

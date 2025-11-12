@@ -343,7 +343,7 @@ export default function SkilledMemberDashboard() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         initialTab="login"
-        onAuthSuccess={() => setShowAuthModal(false)}
+        // onAuthSuccess={() => setShowAuthModal(false)}
         hideSignup={true}
       />
     </div>
