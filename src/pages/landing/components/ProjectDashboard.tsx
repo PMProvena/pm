@@ -179,7 +179,8 @@ export function ProjectDashboard() {
 
   // use the milestones from MyProjects if found, otherwise fallback to mock
   const milestones =
-    (matchedProject as any)?.milestones?.length > 0
+    Array.isArray((matchedProject as any)?.milestones) &&
+    (matchedProject as any).milestones.length > 0
       ? (matchedProject as any).milestones.map((m: any) => ({
           id: m.id?.toString(),
           title: m.title,
@@ -191,7 +192,7 @@ export function ProjectDashboard() {
           feedback: m.mentor_feedback,
           mentorRating: m.rating,
         }))
-      : "No milestones";
+      : [];
 
   // const teamMembers = [
   //   { name: "Sarah Chen", role: "UI/UX Designer", avatar: "SC" },
@@ -380,102 +381,108 @@ export function ProjectDashboard() {
 
                 <TabsContent value="milestones" className="space-y-6">
                   <div className="space-y-4">
-                    {milestones.map((milestone: any) => (
-                      <Card
-                        key={milestone.id}
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          milestone.status === "in-progress"
-                            ? "ring-2 ring-primary"
-                            : ""
-                        }`}
-                        onClick={() => handleMilestoneClick(milestone)}
-                      >
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <span className="text-sm text-muted-foreground">
-                                  Week {milestone.week}
-                                </span>
-                                <Badge
-                                  className={getStatusColor(milestone.status)}
-                                >
-                                  <div className="flex items-center space-x-1">
-                                    {getStatusIcon(milestone.status)}
-                                    <span className="capitalize">
-                                      {milestone.status.replace("-", " ")}
-                                    </span>
-                                  </div>
-                                </Badge>
-                              </div>
-                              <CardTitle className="text-lg">
-                                {milestone.title}
-                              </CardTitle>
-                              <CardDescription className="mt-1">
-                                {milestone.description}
-                              </CardDescription>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Due:{" "}
-                              {new Date(milestone.dueDate).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="text-sm mb-2">Deliverables:</h4>
-                              <div className="flex flex-wrap gap-2">
-                                {milestone.deliverables.map(
-                                  (deliverable: any, index: number) => (
-                                    <Badge
-                                      key={index}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {deliverable}
-                                    </Badge>
-                                  )
-                                )}
-                              </div>
-                            </div>
-
-                            {milestone.feedback && (
-                              <div className="bg-green-50 p-3 rounded-lg">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <MessageSquare className="h-4 w-4 text-green-600" />
-                                  <span className="text-sm text-green-800">
-                                    Mentor Feedback
+                    {milestones.length > 0 ? (
+                      milestones.map((milestone: any) => (
+                        <Card
+                          key={milestone.id}
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            milestone.status === "in-progress"
+                              ? "ring-2 ring-primary"
+                              : ""
+                          }`}
+                          onClick={() => handleMilestoneClick(milestone)}
+                        >
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <span className="text-sm text-muted-foreground">
+                                    Week {milestone.week}
                                   </span>
-                                  {milestone.mentorRating && (
+                                  <Badge
+                                    className={getStatusColor(milestone.status)}
+                                  >
                                     <div className="flex items-center space-x-1">
-                                      {[...Array(milestone.mentorRating)].map(
-                                        (_, i) => (
-                                          <Star
-                                            key={i}
-                                            className="h-3 w-3 fill-yellow-400 text-yellow-400"
-                                          />
-                                        )
-                                      )}
+                                      {getStatusIcon(milestone.status)}
+                                      <span className="capitalize">
+                                        {milestone.status.replace("-", " ")}
+                                      </span>
                                     </div>
+                                  </Badge>
+                                </div>
+                                <CardTitle className="text-lg">
+                                  {milestone.title}
+                                </CardTitle>
+                                <CardDescription className="mt-1">
+                                  {milestone.description}
+                                </CardDescription>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Due:{" "}
+                                {new Date(
+                                  milestone.dueDate
+                                ).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div>
+                                <h4 className="text-sm mb-2">Deliverables:</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {milestone.deliverables.map(
+                                    (deliverable: any, index: number) => (
+                                      <Badge
+                                        key={index}
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {deliverable}
+                                      </Badge>
+                                    )
                                   )}
                                 </div>
-                                <p className="text-sm text-green-700">
-                                  {milestone.feedback}
-                                </p>
                               </div>
-                            )}
 
-                            {milestone.status === "in-progress" && (
-                              <Button className="w-full">
-                                <Upload className="h-4 w-4 mr-2" />
-                                Upload Deliverables
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                              {milestone.feedback && (
+                                <div className="bg-green-50 p-3 rounded-lg">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <MessageSquare className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm text-green-800">
+                                      Mentor Feedback
+                                    </span>
+                                    {milestone.mentorRating && (
+                                      <div className="flex items-center space-x-1">
+                                        {[...Array(milestone.mentorRating)].map(
+                                          (_, i) => (
+                                            <Star
+                                              key={i}
+                                              className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                                            />
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-green-700">
+                                    {milestone.feedback}
+                                  </p>
+                                </div>
+                              )}
+
+                              {milestone.status === "in-progress" && (
+                                <Button className="w-full">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Deliverables
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <p>No milestone available</p>
+                    )}
                   </div>
                 </TabsContent>
 
