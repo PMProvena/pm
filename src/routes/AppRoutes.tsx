@@ -18,6 +18,7 @@ import { RewardsSystem } from "@/pages/superadmin/components/RewardsSystem";
 import { TeamOversight } from "@/pages/superadmin/components/TeamOversight";
 import { UserManagement } from "@/pages/superadmin/components/UserManagement";
 import CreateProjectForm from "@/pages/superadmin/components/CreateProjectForm";
+import AddNewUser from "@/pages/superadmin/components/AddNewUser";
 
 const user = JSON.parse(localStorage.getItem("userDetails") || "null");
 console.log("user", user);
@@ -51,6 +52,7 @@ export default function AppRoutes() {
       >
         <Route path="dashboard" element={<DashboardOverview />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="users/new" element={<AddNewUser />} />
         <Route path="projects" element={<ProjectManagement />} />
         <Route path="projects/new" element={<CreateProjectForm />} />
         <Route path="teams" element={<TeamOversight />} />

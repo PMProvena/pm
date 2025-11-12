@@ -18,7 +18,7 @@ export interface Project {
   objectives?: string[];
   requiredSkills?: string[];
   duration: string;
-  difficulty: "Beginner" | "Intermediate" | "Hard";
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
   teamSize: number;
   price: number;
   status: "open" | "in-progress" | "completed";

@@ -1,52 +1,87 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import type { UsersResponse } from "@/api/interfaces/user";
+import { useGetAllUsers } from "@/hooks/users/useGetAllUsers";
+import { formatDate } from "@/lib/utils";
+import Error from "@/pages/landing/components/error/Error";
 import { Ban, Edit, MoreHorizontal, Search, UserPlus } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "./ui/badge";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-const pms = [
-  { id: 1, name: "Sarah Chen", email: "sarah.chen@email.com", projects: 2, status: "active", joinDate: "2024-01-15" },
-  { id: 2, name: "Mike Johnson", email: "mike.j@email.com", projects: 1, status: "active", joinDate: "2024-02-20" },
-  { id: 3, name: "Emily Davis", email: "emily.d@email.com", projects: 3, status: "inactive", joinDate: "2024-01-08" },
-  { id: 4, name: "Alex Rodriguez", email: "alex.r@email.com", projects: 1, status: "active", joinDate: "2024-03-05" },
-];
-
-const mentors = [
-  { id: 1, name: "John Smith", email: "john.smith@email.com", expertise: "Product Strategy", activeProjects: 3, rating: 4.8, status: "active" },
-  { id: 2, name: "Lisa Wong", email: "lisa.wong@email.com", expertise: "UX Research", activeProjects: 2, rating: 4.9, status: "active" },
-  { id: 3, name: "David Brown", email: "david.b@email.com", expertise: "Technical PM", activeProjects: 1, rating: 4.7, status: "inactive" },
-  { id: 4, name: "Maria Garcia", email: "maria.g@email.com", expertise: "Data Analytics", activeProjects: 4, rating: 4.8, status: "active" },
-];
-
-const skillMembers = [
-  { id: 1, name: "Tom Wilson", email: "tom.w@email.com", skill: "UI/UX Design", projects: 5, rating: 4.6, available: true },
-  { id: 2, name: "Kate Anderson", email: "kate.a@email.com", skill: "Frontend Dev", projects: 3, rating: 4.8, available: true },
-  { id: 3, name: "Chris Lee", email: "chris.l@email.com", skill: "Backend Dev", projects: 4, rating: 4.7, available: false },
-  { id: 4, name: "Amy Foster", email: "amy.f@email.com", skill: "Mobile Dev", projects: 2, rating: 4.9, available: true },
-  { id: 5, name: "Ryan Clark", email: "ryan.c@email.com", skill: "Data Science", projects: 6, rating: 4.5, available: true },
-];
-
 export function UserManagement() {
+  const navigate = useNavigate();
+
+  const {
+    data: AllUsers,
+    isPending,
+    isError,
+    refetch: refetchUsers,
+  } = useGetAllUsers() as {
+    data?: UsersResponse;
+    isPending: boolean;
+    isError: boolean;
+    refetch: () => void;
+  };
+
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter users by role
+  const usersByRole = useMemo(() => {
+    if (!AllUsers?.data) return { pm: [], mentor: [], "skilled-member": [] };
+
+    return AllUsers.data.reduce(
+      (acc: any, user: any) => {
+        const role = user.role;
+        if (role === "pm") acc.pm.push(user);
+        else if (role === "mentor") acc.mentor.push(user);
+        else if (role === "skilled-member") acc["skilled-member"].push(user);
+        return acc;
+      },
+      { pm: [], mentor: [], "skilled-member": [] }
+    );
+  }, [AllUsers]);
+
+  const filterAndSearch = (users: any[]) =>
+    users.filter((u) =>
+      `${u.first_name} ${u.last_name} ${u.email}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+
+  if (isError) return <Error refetchData={refetchUsers} />;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Manage PMs, mentors, and skill members</p>
+          <p className="text-muted-foreground">
+            Manage PMs, mentors, and skill members
+          </p>
         </div>
-        <Button>
+        <Button
+          onClick={() => navigate("/admin/users/new")}
+          className="cursor-pointer"
+        >
           <UserPlus className="mr-2 h-4 w-4" />
           Add User
         </Button>
@@ -64,200 +99,258 @@ export function UserManagement() {
         </div>
       </div>
 
-      <Tabs defaultValue="pms" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="pms">Product Managers ({pms.length})</TabsTrigger>
-          <TabsTrigger value="mentors">Mentors ({mentors.length})</TabsTrigger>
-          <TabsTrigger value="skills">Skill Members ({skillMembers.length})</TabsTrigger>
-        </TabsList>
+      {isPending ? (
+        <p className="text-center">Loading...</p>
+      ) : (
+        <Tabs defaultValue="pm" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="pm" className="cursor-pointer">
+              Product Managers ({usersByRole.pm.length})
+            </TabsTrigger>
+            <TabsTrigger value="mentor" className="cursor-pointer">
+              Mentors ({usersByRole.mentor.length})
+            </TabsTrigger>
+            <TabsTrigger value="skilled-member" className="cursor-pointer">
+              Skill Members ({usersByRole["skilled-member"].length})
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="pms">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Managers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Active Projects</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Join Date</TableHead>
-                    <TableHead className="w-[70px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pms.map((pm) => (
-                    <TableRow key={pm.id}>
-                      <TableCell className="font-medium">{pm.name}</TableCell>
-                      <TableCell>{pm.email}</TableCell>
-                      <TableCell>{pm.projects}</TableCell>
-                      <TableCell>
-                        <Badge variant={pm.status === "active" ? "default" : "secondary"}>
-                          {pm.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{pm.joinDate}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Ban className="mr-2 h-4 w-4" />
-                              Ban User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+          {/* PMs */}
+          <TabsContent value="pm">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Managers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Active Projects</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Join Date</TableHead>
+                      <TableHead className="w-[70px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableHeader>
+                  <TableBody>
+                    {filterAndSearch(usersByRole.pm).length > 0 ? (
+                      filterAndSearch(usersByRole.pm).map((user) => (
+                        <TableRow key={user._id}>
+                          <TableCell className="font-medium">
+                            {user.first_name} {user.last_name}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.active_projects || "---"}</TableCell>
+                          <TableCell>
+                             {user.status || "---"}
+                            {/* <Badge variant="default">
+                              {user.status || "---"}
+                            </Badge> */}
+                          </TableCell>
+                          <TableCell>
+                            {user.created_at
+                              ? formatDate(user.created_at)
+                              : "---"}
+                          </TableCell>
 
-        <TabsContent value="mentors">
-          <Card>
-            <CardHeader>
-              <CardTitle>Mentors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Expertise</TableHead>
-                    <TableHead>Active Projects</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[70px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mentors.map((mentor) => (
-                    <TableRow key={mentor.id}>
-                      <TableCell className="font-medium">{mentor.name}</TableCell>
-                      <TableCell>{mentor.email}</TableCell>
-                      <TableCell>{mentor.expertise}</TableCell>
-                      <TableCell>{mentor.activeProjects}</TableCell>
-                      <TableCell>⭐ {mentor.rating}</TableCell>
-                      <TableCell>
-                        <Badge variant={mentor.status === "active" ? "default" : "secondary"}>
-                          {mentor.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Ban className="mr-2 h-4 w-4" />
-                              Remove
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                  <Ban className="mr-2 h-4 w-4" />
+                                  Ban User
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="text-center text-muted-foreground"
+                        >
+                          Not found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Mentors */}
+          <TabsContent value="mentor">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mentors</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Experience Level</TableHead>
+                      <TableHead>Active Projects</TableHead>
+                      <TableHead>Skills</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[70px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableHeader>
+                  <TableBody>
+                    {filterAndSearch(usersByRole.pm).length > 0 ? (
+                      filterAndSearch(usersByRole.mentor).map((user) => (
+                        <TableRow key={user._id}>
+                          <TableCell className="font-medium">
+                            {user.first_name} {user.last_name}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.experience_level}</TableCell>
+                          <TableCell>{user.active_projects || "---"}</TableCell>
+                          <TableCell>
+                            {user.skills?.length
+                              ? user.skills.join(", ")
+                              : "---"}
+                          </TableCell>
+                          <TableCell>
+                             {user.status || "---"}
+                            {/* <Badge variant="default">
+                              {user.status || "---"}
+                            </Badge> */}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                  <Ban className="mr-2 h-4 w-4" />
+                                  Remove
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="text-center text-muted-foreground"
+                        >
+                          Not found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="skills">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+          {/* Skilled Members */}
+          <TabsContent value="skilled-member">
+            <Card>
+              <CardHeader>
                 <CardTitle>Skill Members</CardTitle>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by skill" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Skills</SelectItem>
-                    <SelectItem value="ui-ux">UI/UX Design</SelectItem>
-                    <SelectItem value="frontend">Frontend Dev</SelectItem>
-                    <SelectItem value="backend">Backend Dev</SelectItem>
-                    <SelectItem value="mobile">Mobile Dev</SelectItem>
-                    <SelectItem value="data">Data Science</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Skill</TableHead>
-                    <TableHead>Projects</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Availability</TableHead>
-                    <TableHead className="w-[70px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {skillMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">{member.name}</TableCell>
-                      <TableCell>{member.email}</TableCell>
-                      <TableCell>{member.skill}</TableCell>
-                      <TableCell>{member.projects}</TableCell>
-                      <TableCell>⭐ {member.rating}</TableCell>
-                      <TableCell>
-                        <Badge variant={member.available ? "default" : "secondary"}>
-                          {member.available ? "Available" : "Busy"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Ban className="mr-2 h-4 w-4" />
-                              Remove
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Skills</TableHead>
+                      <TableHead>Active Projects</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[70px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  </TableHeader>
+                  <TableBody>
+                    {filterAndSearch(usersByRole.pm).length > 0 ? (
+                      filterAndSearch(usersByRole["skilled-member"]).map(
+                        (user) => (
+                          <TableRow key={user._id}>
+                            <TableCell className="font-medium">
+                              {user.first_name} {user.last_name}
+                            </TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              {user.skills?.length
+                                ? user.skills.join(", ")
+                                : "---"}
+                            </TableCell>
+                            <TableCell>
+                              {user.active_projects || "---"}
+                            </TableCell>
+                            <TableCell>
+                               {user.status || "---"}
+                              {/* <Badge variant="default">
+                                {user.status || "---"}
+                              </Badge> */}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive">
+                                    <Ban className="mr-2 h-4 w-4" />
+                                    Remove
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="text-center text-muted-foreground"
+                        >
+                          Not found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

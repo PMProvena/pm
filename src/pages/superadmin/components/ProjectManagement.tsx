@@ -55,6 +55,19 @@ export function ProjectManagement() {
 
   const selectedProject = projects.find((p) => p._id === selectedProjectId);
 
+  const getDifficultyBadgeClass = (difficulty: string) => {
+    switch (difficulty) {
+      case "Beginner":
+        return "bg-green-500 text-white hover:bg-green-600";
+      case "Intermediate":
+        return "bg-yellow-500 text-white hover:bg-yellow-600";
+      case "Advanced":
+        return "bg-red-500 text-white hover:bg-red-600";
+      default:
+        return "bg-gray-400 text-white";
+    }
+  };
+
   if (isError) return <Error refetchData={refetchProjects} />;
 
   return (
@@ -224,13 +237,9 @@ export function ProjectManagement() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={
-                              project.difficulty === "Beginner"
-                                ? "default"
-                                : project.difficulty === "Intermediate"
-                                ? "secondary"
-                                : "destructive"
-                            }
+                            className={getDifficultyBadgeClass(
+                              project.difficulty
+                            )}
                           >
                             {project.difficulty}
                           </Badge>

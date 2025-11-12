@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "@/api/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 // -------- REGISTER ---------
 export const useRegister = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (payload: {
       firstName: string;
@@ -29,6 +31,9 @@ export const useRegister = () => {
       } else {
         console.warn("No token found in register response:", data);
       }
+
+      // ✅ Refetch all users immediately
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: any) => {
       const errMsg =

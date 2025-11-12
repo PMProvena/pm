@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 export interface Milestone {
   week: number;
-  status: string;
+  // status: string;
   due_date: string;
   title: string;
   description: string;

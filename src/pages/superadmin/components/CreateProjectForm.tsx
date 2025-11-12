@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -52,24 +52,25 @@ export default function CreateProjectForm() {
   const [price, setPrice] = useState<number | "">("");
   const [timeline, setTimeline] = useState(1);
   const [showMilestoneStep, setShowMilestoneStep] = useState(false);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
 
   const handleSkillToggle = (skill: string) => {
     let updatedSkills: string[];
+
     if (selectedSkills.includes(skill)) {
+      // Unselect skill
       updatedSkills = selectedSkills.filter((s) => s !== skill);
     } else {
+      // Add skill — but limit to team size
+      if (selectedSkills.length >= teamSize) {
+        toast.error(
+          `You can only select ${teamSize} team member${
+            teamSize > 1 ? "s" : ""
+          }.`
+        );
+        return;
+      }
       updatedSkills = [...selectedSkills, skill];
-    }
-
-    const maxSelectableMembers = teamSize - 1; // Exclude Product Manager
-    if (updatedSkills.length > maxSelectableMembers) {
-      setError(
-        `You can only select up to ${maxSelectableMembers} team members.`
-      );
-      return; // Prevent adding the extra skill
-    } else {
-      setError("");
     }
 
     setSelectedSkills(updatedSkills);
@@ -89,7 +90,7 @@ export default function CreateProjectForm() {
   const [milestones, setMilestones] = useState([
     {
       week: 1,
-      status: "pending",
+      // status: "pending",
       due_date: "",
       title: "",
       description: "",
@@ -141,7 +142,7 @@ export default function CreateProjectForm() {
       ...milestones,
       {
         week: milestones.length + 1,
-        status: "pending",
+        // status: "pending",
         due_date: "",
         title: "",
         description: "",
@@ -196,9 +197,15 @@ export default function CreateProjectForm() {
     );
   };
 
+  useEffect(() => {
+    if (selectedSkills.length > teamSize) {
+      setSelectedSkills((prev) => prev.slice(0, teamSize));
+    }
+  }, [teamSize, selectedSkills]);
+
   if (!selectedIndustry)
     return (
-      <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto">
+       <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
         <div className="flex items-center justify-between w-full">
           <h2 className="text-lg font-semibold">Select Industry</h2>
           <button
@@ -225,7 +232,8 @@ export default function CreateProjectForm() {
 
   if (showMilestoneStep)
     return (
-      <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto">
+       <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
+        
         <h2 className="text-lg font-semibold">Create Project Milestones</h2>
         {milestones.map((ms, mIndex) => (
           <div key={mIndex} className="border p-4 rounded space-y-2">
@@ -257,11 +265,11 @@ export default function CreateProjectForm() {
                 )
               }
               placeholderText="Select due date"
-              className="border rounded text-sm py-1 px-2 !w-[150px] cursor-pointer"
+              className="border rounded text-sm py-1 px-2 w-[150px]! cursor-pointer"
               dateFormat="yyyy-MM-dd"
             />
 
-            <select
+            {/* <select
               value={ms.status}
               onChange={(e) =>
                 handleMilestoneChange(mIndex, "status", e.target.value)
@@ -270,7 +278,7 @@ export default function CreateProjectForm() {
             >
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
-            </select>
+            </select> */}
 
             <div className="space-y-1">
               <span className="font-medium">Deliverables:</span>
@@ -325,7 +333,7 @@ export default function CreateProjectForm() {
     );
 
   return (
-    <Card className="p-6 space-y-5 max-w-[600px] w-full mx-auto">
+    <Card className="p-6 space-y-5 max-w-[600px] w-full mx-auto mt-10">
       <div className="flex items-center justify-between w-full">
         <h2 className="text-xl font-semibold">
           Create New Project ({selectedIndustry})
@@ -398,7 +406,7 @@ export default function CreateProjectForm() {
           ))}
         </div>
         {/* Instant error message */}
-        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+        {/* {error && <p className="text-red-600 text-sm mt-2">{error}</p>} */}
       </div>
 
       {/* Difficulty */}

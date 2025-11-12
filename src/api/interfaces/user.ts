@@ -20,17 +20,43 @@ export interface User {
   hasCompletedOnboarding: boolean;
 }
 
- export interface Project {
+export interface Project {
   id: string;
   title: string;
   industry: string;
   description: string;
   duration: string;
   price: number;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
   skills: string[];
   milestones: number;
   teamSize: number;
   icon: React.ReactNode;
   objectives: string[];
+}
+
+interface UserTypee {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: "pm" | "mentor" | "skilled-member" | "admin";
+  experience_level: string;
+  status: string;
+  completed_projects: number;
+  active_projects: number;
+  certificates: number;
+  created_at: string; // e.g., "2025-11-12 15:44:53"
+  description: string | null;
+  points: number;
+  profile_completion: number;
+  skills: string[];
+  tools: string[];
+  years_of_experience: number | null;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  message: string;
+  data: UserTypee[];
 }
