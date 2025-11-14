@@ -17,11 +17,11 @@ import { useCreateMilestonesBulk } from "@/hooks/projects/useCreateMilestonesBul
 
 const industries = [
   "FinTech",
-  "HealthCare",
-  "E-commerce",
+  "HealthTech",
+  "E-Commerce",
   "EdTech",
   "SaaS",
-  "Technology",
+  "Mobile Apps",
 ];
 const difficulties = ["Beginner", "Intermediate", "Advanced"];
 const skills = [
@@ -205,7 +205,7 @@ export default function CreateProjectForm() {
 
   if (!selectedIndustry)
     return (
-       <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
+      <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
         <div className="flex items-center justify-between w-full">
           <h2 className="text-lg font-semibold">Select Industry</h2>
           <button
@@ -232,8 +232,7 @@ export default function CreateProjectForm() {
 
   if (showMilestoneStep)
     return (
-       <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
-        
+      <Card className="p-6 space-y-3 max-w-[600px] w-full mx-auto mt-10">
         <h2 className="text-lg font-semibold">Create Project Milestones</h2>
         {milestones.map((ms, mIndex) => (
           <div key={mIndex} className="border p-4 rounded space-y-2">

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Loader from "@/components/Loader";
+import { useUserProfile } from "@/hooks/users/useUserProfile";
 import {
   AlertCircle,
   Calendar,
@@ -8,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { PointsTracker } from "./PointsTracker";
 import { ProjectDetail } from "./ProjectDetail";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -23,8 +27,6 @@ import {
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { AuthModal } from "@/pages/landing/components/AuthModal";
-import { useAuthStore } from "@/store/authStore";
 
 interface Project {
   id: string;
@@ -102,14 +104,41 @@ const mockProjects: Project[] = [
 ];
 
 export function MentorDashboard() {
-  const user = useAuthStore((state) => state.user);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
+  const userId = user?.data?.userId;
+
+  const { data: profileData, isPending } = useUserProfile(userId);
+
+  const isProfileComplete = (data: any, yearsOfExp: string) => {
+    return (
+      data?.first_name?.trim() &&
+      data?.last_name?.trim() &&
+      data?.role?.trim() &&
+      data?.experience_level?.trim() &&
+      yearsOfExp?.trim() &&
+      data?.description?.trim() &&
+      data?.tools?.length > 0 &&
+      data?.skills?.length > 0
+    );
+  };
+
+  const [checkingProfile, setCheckingProfile] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setShowAuthModal(true);
+    if (!isPending && profileData?.data) {
+      const complete = isProfileComplete(
+        profileData.data,
+        profileData.data.years_of_experience?.toString() || ""
+      );
+
+      if (!complete) {
+        navigate("/mentor/profile");
+      } else {
+        setCheckingProfile(false);
+      }
     }
-  }, [user]);
+  }, [isPending, profileData, navigate]);
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -151,6 +180,14 @@ export function MentorDashboard() {
         project={selectedProject}
         onBack={() => setSelectedProject(null)}
       />
+    );
+  }
+
+  if (isPending || checkingProfile) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader />
+      </div>
     );
   }
 
@@ -420,14 +457,14 @@ export function MentorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-
+      {/* 
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         initialTab="login"
         // onAuthSuccess={() => setShowAuthModal(false)}
         hideSignup={true}
-      />
+      /> */}
     </div>
   );
 }

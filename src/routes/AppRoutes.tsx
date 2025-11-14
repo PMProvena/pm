@@ -24,6 +24,7 @@ import { TeamOversight } from "@/pages/superadmin/components/TeamOversight";
 import { UserManagement } from "@/pages/superadmin/components/UserManagement";
 import SkilledMemberProfile from "@/pages/skilledmember/SkilledMemberProfile";
 import ProtectedRoute from "./ProtectedRoute";
+import MentorProfile from "@/pages/mentor/MentorProfile";
 
 export default function AppRoutes() {
   return (
@@ -73,9 +74,17 @@ export default function AppRoutes() {
       <Route
         path="/mentor"
         element={
-          // <ProtectedRoute allowedRoles={["mentor"]}>
-          <MentorDashboardd />
-          // </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["mentor"]}>
+            <MentorDashboardd />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mentor/profile"
+        element={
+          <ProtectedRoute allowedRoles={["mentor"]}>
+            <MentorProfile />
+          </ProtectedRoute>
         }
       />
 

@@ -7,6 +7,13 @@ interface Props {
   allowedRoles: string[];
 }
 
+const loginRoutes: Record<string, string> = {
+  "skilled-member": "/skilled-member/login",
+  mentor: "/mentor/login",
+  admin: "/admin/login",
+  pm: "/",
+};
+
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -14,7 +21,7 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("userDetails");
-    const storedToken = localStorage.getItem("pmUserToken");
+    const storedToken = localStorage.getItem("pmUserToken"); // or generalize if needed
 
     const user = storedUser ? JSON.parse(storedUser) : null;
     setUserRole(user?.data?.role || null);
@@ -25,10 +32,18 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
 
   if (isLoading) return null; // or a spinner
 
-  if (!token || !userRole)
-    return <Navigate to="/skilled-member/login" replace />;
-  if (!allowedRoles.includes(userRole))
-    return <Navigate to="/skilled-member/login" replace />;
+  // no token or no role
+  if (!token || !userRole) {
+    const redirectTo =
+      allowedRoles[0] in loginRoutes ? loginRoutes[allowedRoles[0]] : "/";
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  // role not allowed
+  if (!allowedRoles.includes(userRole)) {
+    const redirectTo = userRole in loginRoutes ? loginRoutes[userRole] : "/";
+    return <Navigate to={redirectTo} replace />;
+  }
 
   return children;
 }

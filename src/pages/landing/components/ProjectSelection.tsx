@@ -27,6 +27,15 @@ import {
 } from "./ui/card";
 import { Progress } from "./ui/progress";
 
+const allowedIndustries = [
+  "FinTech",
+  "HealthTech",
+  "E-Commerce",
+  "EdTech",
+  "SaaS",
+  "Mobile Apps",
+];
+
 export function ProjectSelection() {
   const user = JSON.parse(localStorage.getItem("userDetails") || "null");
   console.log("user", user);
@@ -78,7 +87,11 @@ export function ProjectSelection() {
     const uniqueIndustries = Array.from(
       new Set(projects?.map((p) => p.industry))
     );
-    return ["all", ...uniqueIndustries];
+    // Only include allowed industries
+    const filtered = uniqueIndustries.filter((industry) =>
+      allowedIndustries.includes(industry)
+    );
+    return ["all", ...filtered];
   }, [projects]);
 
   const filteredProjects = useMemo(() => {
@@ -259,7 +272,7 @@ export function ProjectSelection() {
                     {/*  */}
                     {user && selectedProject && (
                       <PayButton
-                        email={user.data.email }
+                        email={user.data.email}
                         amount={selectedProject.price}
                         projectId={selectedProject._id}
                         userId={user.data.userId || user.data.id}
