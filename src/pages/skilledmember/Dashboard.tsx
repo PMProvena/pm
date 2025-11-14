@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BarChart3, Calendar, Target, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "./components/skilled-member/Header";
 import { NotificationPanel } from "./components/skilled-member/NotificationPanel";
 import { PointsWidget } from "./components/skilled-member/PointsWidget";
@@ -10,6 +10,9 @@ import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
+import { useNavigate } from "react-router-dom";
+import { useUserProfile } from "@/hooks/users/useUserProfile";
+import Loader from "@/components/Loader";
 
 const mockProjects = [
   {
@@ -130,8 +133,43 @@ const mockNotifications: any = [
 ];
 
 export default function SkilledMemberDashboard() {
+  const navigate = useNavigate();
+
   const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
-  console.log("skilled user", user);
+  const userId = user?.data?.userId;
+
+  const { data: profileData, isPending } = useUserProfile(userId);
+
+  const isProfileComplete = (data: any, yearsOfExp: string) => {
+    return (
+      data?.first_name?.trim() &&
+      data?.last_name?.trim() &&
+      data?.role?.trim() &&
+      data?.experience_level?.trim() &&
+      yearsOfExp?.trim() &&
+      data?.description?.trim() &&
+      data?.tools?.length > 0 &&
+      data?.skills?.length > 0
+    );
+  };
+
+  const [checkingProfile, setCheckingProfile] = useState(true);
+
+  useEffect(() => {
+    if (!isPending && profileData?.data) {
+      const complete = isProfileComplete(
+        profileData.data,
+        profileData.data.years_of_experience?.toString() || ""
+      );
+
+      if (!complete) {
+        navigate("/skilled-member/profile");
+      } else {
+        setCheckingProfile(false);
+      }
+    }
+  }, [isPending, profileData, navigate]);
+
   // const [showAuthModal, setShowAuthModal] = useState(false);
 
   // useEffect(() => {
@@ -175,6 +213,14 @@ export default function SkilledMemberDashboard() {
   };
 
   const unreadNotifications = notifications.filter((n: any) => !n.read).length;
+
+  if (isPending || checkingProfile) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
