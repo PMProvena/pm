@@ -35,6 +35,7 @@ import {
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useAssignUsers } from "@/hooks/users/useAssignUsers";
+import Loader from "@/components/Loader";
 
 interface TeamMember {
   id: string;
@@ -243,7 +244,7 @@ export function TeamFormation() {
           </div>
 
           {isPending ? (
-            <p className="text-center">Loading...</p>
+              <Loader /> 
           ) : (
             <div className="grid lg:grid-cols-4 gap-8">
               {/* Team Overview */}

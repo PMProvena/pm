@@ -51,8 +51,6 @@ export const useLogin = () => {
       return data;
     },
     onSuccess: (data) => {
-      toast.success("Logged in successfully!");
-
       // Store full response
       localStorage.setItem("userDetails", JSON.stringify(data));
 

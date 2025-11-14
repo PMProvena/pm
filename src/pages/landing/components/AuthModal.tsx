@@ -109,26 +109,31 @@ export function AuthModal({
         },
         {
           onSuccess: (data) => {
-            console.log("login data", data);
-            onClose?.();
-
             let role = data?.data?.role;
 
-            // Default to skilled-member if role is not admin, pm, or mentor
+            // If role is missing
+            if (!role) {
+              toast.error(
+                "Unable to determine your role. Please contact support."
+              );
+              return;
+            }
+
+            // Convert all non-admin/pm/mentor roles to skilled-member
             if (!["admin", "pm", "mentor"].includes(role)) {
               role = "skilled-member";
             }
 
-            // Redirect based on role
-            if (role === "admin") {
-              navigate("/admin");
-            } else if (role === "pm") {
-              navigate("/dashboard");
-            } else if (role === "mentor") {
-              navigate("/mentor");
-            } else if (role === "skilled-member") {
-              navigate("/skilled-member");
+            // Reject if NOT pm
+            if (role !== "pm") {
+              toast.error("You are not a Product Manager");
+              return;
             }
+
+            // Allow pm to proceed
+            onClose?.();
+            toast.success("Logged in successfully!");
+            navigate("/dashboard");
           },
         }
       );

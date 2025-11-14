@@ -1,6 +1,9 @@
-import { Bell, User, LogOut, Settings } from "lucide-react";
+import { Bell, Edit, LogOut, User } from "lucide-react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,9 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Badge } from "../ui/badge";
-import { useAuthStore } from "@/store/authStore";
-import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   user: {
@@ -23,25 +23,34 @@ interface HeaderProps {
 }
 
 export function Header({ user, notificationCount }: HeaderProps) {
-  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    localStorage.removeItem("userDetails");
+    localStorage.removeItem("pmUserToken");
+    navigate("/skilled-member/login");
+    toast.success("Logged out successfully!");
   };
 
   return (
     <header className="border-b bg-white px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1>Provena</h1>
-          <Badge variant="secondary">{user.role}</Badge>
+          <img
+            src="/pngs/logotwo.png"
+            alt="logo"
+            className="w-40  object-contain"
+          />
+          <Badge variant="skilled" className="hidden md:flex">
+            {user.role}
+          </Badge>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Points:</span>
+            <span className="text-sm font-semibold text-muted-foreground">
+              Points:
+            </span>
             <Badge variant="outline">{user.points}</Badge>
           </div>
 
@@ -59,7 +68,8 @@ export function Header({ user, notificationCount }: HeaderProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              {/* Use just the avatar wrapper; no extra Button click */}
+              <div className="relative h-8 w-8 rounded-full cursor-pointer">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback>
@@ -69,8 +79,14 @@ export function Header({ user, notificationCount }: HeaderProps) {
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-              </Button>
+
+                {/* Small edit icon overlay */}
+                <div className="absolute top-0 right-0 bg-white rounded-full p-0.5">
+                  <Edit size={12} className="text-primary" />
+                </div>
+              </div>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -78,17 +94,28 @@ export function Header({ user, notificationCount }: HeaderProps) {
                   {user.role}
                 </p>
               </div>
+
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => navigate("/skilled-member/profile")}
+              >
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+
+              {/* <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
+
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
+
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="cursor-pointer"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

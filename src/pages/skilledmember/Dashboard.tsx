@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { BarChart3, Calendar, Target, Users } from "lucide-react";
+import { useState } from "react";
 import { Header } from "./components/skilled-member/Header";
+import { NotificationPanel } from "./components/skilled-member/NotificationPanel";
+import { PointsWidget } from "./components/skilled-member/PointsWidget";
 import { ProjectCard } from "./components/skilled-member/ProjectCard";
 import { TaskList } from "./components/skilled-member/TaskList";
-import { PointsWidget } from "./components/skilled-member/PointsWidget";
-import { NotificationPanel } from "./components/skilled-member/NotificationPanel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
-import { BarChart3, Users, Target, Calendar } from "lucide-react";
-import { useAuthStore } from "@/store/authStore";
-import { AuthModal } from "../landing/components/AuthModal";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 
 const mockProjects = [
   {
@@ -102,53 +101,53 @@ const mockTasks = [
   },
 ];
 
-const mockNotifications = [
-  {
-    id: "1",
-    type: "warning" as const,
-    title: "Task Due Soon",
-    message: "Your wireframe deliverable for FinTech project is due in 2 days",
-    timestamp: "2 hours ago",
-    read: false,
-    actionRequired: true,
-  },
-  {
-    id: "2",
-    type: "success" as const,
-    title: "Milestone Completed",
-    message: "You've successfully completed Milestone 3 and earned 200 points!",
-    timestamp: "1 day ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "info" as const,
-    title: "New Team Member",
-    message: "Lisa Wang (QA Engineer) has joined your FinTech project team",
-    timestamp: "2 days ago",
-    read: true,
-  },
+const mockNotifications: any = [
+  // {
+  //   id: "1",
+  //   type: "warning" as const,
+  //   title: "Task Due Soon",
+  //   message: "Your wireframe deliverable for FinTech project is due in 2 days",
+  //   timestamp: "2 hours ago",
+  //   read: false,
+  //   actionRequired: true,
+  // },
+  // {
+  //   id: "2",
+  //   type: "success" as const,
+  //   title: "Milestone Completed",
+  //   message: "You've successfully completed Milestone 3 and earned 200 points!",
+  //   timestamp: "1 day ago",
+  //   read: false,
+  // },
+  // {
+  //   id: "3",
+  //   type: "info" as const,
+  //   title: "New Team Member",
+  //   message: "Lisa Wang (QA Engineer) has joined your FinTech project team",
+  //   timestamp: "2 days ago",
+  //   read: true,
+  // },
 ];
 
 export default function SkilledMemberDashboard() {
-  const user = useAuthStore((state) => state.user);
-  console.log("SkilledMemberDashboard user:", user);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
+  console.log("skilled user", user);
+  // const [showAuthModal, setShowAuthModal] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      setShowAuthModal(true);
-    }
-  }, [user]);
-
-  
+  // useEffect(() => {
+  //   if (!user) {
+  //     setShowAuthModal(true);
+  //   }
+  // }, [user]);
 
   // Mock data
   const mockUser = {
-    name: user?.firstName || "Sarah",
-    role: user?.subRole || "UI/UX Designer",
-    avatar: "",
-    points: 2450,
+    name: `${user?.data?.firstName ?? "Unknown"} ${
+      user?.data?.lastName ?? ""
+    }`.trim(),
+    role: user?.data?.role ?? "N/A",
+    avatar: user?.data?.avatar ?? "",
+    points: user?.data?.points ?? 0,
   };
 
   const [notifications, setNotifications] = useState(mockNotifications);
@@ -167,15 +166,15 @@ export default function SkilledMemberDashboard() {
 
   const handleMarkAsRead = (id: string) => {
     setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      notifications.map((n: any) => (n.id === id ? { ...n, read: true } : n))
     );
   };
 
   const handleDismissNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+    setNotifications(notifications.filter((n: any) => n.id !== id));
   };
 
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadNotifications = notifications.filter((n: any) => !n.read).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -339,13 +338,13 @@ export default function SkilledMemberDashboard() {
         </Tabs>
       </main>
 
-      <AuthModal
+      {/* <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         initialTab="login"
         // onAuthSuccess={() => setShowAuthModal(false)}
         hideSignup={true}
-      />
+      /> */}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { Input } from "../landing/components/ui/input";
 import { Label } from "../landing/components/ui/label";
 import toast from "react-hot-toast";
 
-export default function AdminLogin() {
+export default function MentorLogin() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
 
@@ -31,7 +31,7 @@ export default function AdminLogin() {
 
           let role = userDetails?.data?.role;
 
-          // If role is missing entirely
+          // If role is missing
           if (!role) {
             toast.error(
               "Unable to determine your role. Please contact support."
@@ -44,15 +44,15 @@ export default function AdminLogin() {
             role = "skilled-member";
           }
 
-          // Reject if NOT admin
-          if (role !== "admin") {
-            toast.error("You are not an Admin");
+          // Reject if NOT mentor
+          if (role !== "mentor") {
+            toast.error("You are not a Mentor");
             return;
           }
 
-          // Allow admin to continue
+          // Allow mentor to continue
           toast.success("Logged in successfully!");
-          navigate("/admin");
+          navigate("/mentor");
         },
       }
     );

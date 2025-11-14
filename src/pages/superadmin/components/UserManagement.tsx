@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "./ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import Loader from "@/components/Loader";
 
 export function UserManagement() {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ export function UserManagement() {
       </div>
 
       {isPending ? (
-        <p className="text-center">Loading...</p>
+        <Loader /> 
       ) : (
         <Tabs defaultValue="pm" className="space-y-4">
           <TabsList>

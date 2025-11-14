@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetProjects } from "@/hooks/projects/useGetProjects";
 import type { Project } from "@/api/interfaces/projects";
 import Error from "@/pages/landing/components/error/Error";
+import Loader from "@/components/Loader";
 
 export function ProjectManagement() {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ export function ProjectManagement() {
             </CardHeader>
             <CardContent>
               {isPending ? (
-                <p className="text-center">Loading...</p>
+                 <Loader /> 
               ) : projects.length ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {Object.entries(

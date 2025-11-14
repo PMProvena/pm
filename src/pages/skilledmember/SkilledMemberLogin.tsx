@@ -1,22 +1,70 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useLogin } from "@/hooks/auth/useAuth";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../landing/components/ui/button";
 import { Input } from "../landing/components/ui/input";
 import { Label } from "../landing/components/ui/label";
 import toast from "react-hot-toast";
+import Loader from "@/components/Loader";
+import { useUserProfile } from "@/hooks/users/useUserProfile";
 
-export default function AdminLogin() {
+export default function SkilledMemberLogin() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
 
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
+  const userId = user?.data?.userId;
+
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
+
+  // Fetch profile once we know the userId
+  const { data: profileData, isLoading: profileLoading } = useUserProfile(
+    justLoggedIn ? userId : undefined
+  );
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [redirecting, setRedirecting] = useState(false);
+
+  const [redirectTarget, setRedirectTarget] = useState<
+    "dashboard" | "profile" | null
+  >(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const allProfileFieldsFilled = (data: any) => {
+    if (!data) return false;
+    return (
+      data.first_name &&
+      data.last_name &&
+      data.role &&
+      data.experience_level &&
+      data.years_of_experience &&
+      data.description &&
+      data.tools?.length > 0 &&
+      data.skills?.length > 0
+    );
+  };
+
+  useEffect(() => {
+    if (justLoggedIn && profileData?.data) {
+      const target = allProfileFieldsFilled(profileData.data)
+        ? "dashboard"
+        : "profile";
+      setRedirectTarget(target);
+      setRedirecting(true);
+
+      setTimeout(() => {
+        navigate(
+          target === "dashboard" ? "/skilled-member" : "/skilled-member/profile"
+        );
+      }, 1500);
+    }
+  }, [justLoggedIn, profileData, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,26 +87,42 @@ export default function AdminLogin() {
             return;
           }
 
-          // Convert all non-admin/pm/mentor roles to skilled-member
+          // If role is NOT admin, pm, or mentor → consider them skilled-member
           if (!["admin", "pm", "mentor"].includes(role)) {
             role = "skilled-member";
           }
 
-          // Reject if NOT admin
-          if (role !== "admin") {
-            toast.error("You are not an Admin");
+          // Reject admin, pm, mentor
+          if (role !== "skilled-member") {
+            toast.error("You are not a Skilled Member");
             return;
           }
 
-          // Allow admin to continue
+          // Allow skilled member to proceed
           toast.success("Logged in successfully!");
-          navigate("/admin");
+          setJustLoggedIn(true);
+          // navigate("/skilled-member/profile");
+          // setUserId(userDetails.data.userId);
         },
       }
     );
   };
 
-  const isLoading = loginMutation.isPending;
+  const loginInProgress = loginMutation.isPending;
+  const redirectingInProgress = redirecting || (justLoggedIn && profileLoading);
+
+  // Full-screen loader while redirecting after login
+  if (redirectingInProgress) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <Loader />
+        <p className="mt-4 text-lg font-medium">
+          {redirectTarget === "dashboard" && "Redirecting to Dashboard..."}
+          {redirectTarget === "profile" && "Redirecting to Profile..."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center h-screen bg-background px-4 ">
@@ -122,9 +186,9 @@ export default function AdminLogin() {
           <Button
             type="submit"
             className="w-full cursor-pointer"
-            disabled={isLoading}
+            disabled={loginInProgress}
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {loginInProgress ? "Signing In..." : "Sign In"}
           </Button>
 
           <div className="text-center mt-2">

@@ -36,6 +36,7 @@ import { Progress } from "./ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Textarea } from "./ui/textarea";
 import { useGetMyProjects } from "@/hooks/projects/useGetMyProjects";
+import Loader from "@/components/Loader";
 
 interface Milestone {
   id: string;
@@ -275,7 +276,7 @@ export function ProjectDashboard() {
           </Button>
 
           {isMyProjectsLoading ? (
-            <p className="text-center">Loading...</p>
+              <Loader /> 
           ) : (
             <>
               {/* Project Header */}
