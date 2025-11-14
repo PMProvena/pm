@@ -56,7 +56,12 @@ export function ProjectSelection() {
   };
 
   const { projects } = useMemo(() => {
-    return { projects: allProjects?.data || [] };
+    const all = allProjects?.data || [];
+    // Only keep projects in allowedIndustries
+    const filteredProjects = all.filter((p) =>
+      allowedIndustries.includes(p.industry)
+    );
+    return { projects: filteredProjects };
   }, [allProjects]);
 
   const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
