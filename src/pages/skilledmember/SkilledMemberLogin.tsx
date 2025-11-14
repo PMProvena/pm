@@ -27,11 +27,11 @@ export default function SkilledMemberLogin() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [redirecting, setRedirecting] = useState(false);
+  // const [redirecting, setRedirecting] = useState(false);
 
-  const [redirectTarget, setRedirectTarget] = useState<
-    "dashboard" | "profile" | null
-  >(null);
+  // const [redirectTarget, setRedirectTarget] = useState<
+  //   "dashboard" | "profile" | null
+  // >(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -54,16 +54,9 @@ export default function SkilledMemberLogin() {
   useEffect(() => {
     if (justLoggedIn && profileData?.data) {
       const target = allProfileFieldsFilled(profileData.data)
-        ? "dashboard"
-        : "profile";
-      setRedirectTarget(target);
-      setRedirecting(true);
-
-      setTimeout(() => {
-        navigate(
-          target === "dashboard" ? "/skilled-member" : "/skilled-member/profile"
-        );
-      }, 1500);
+        ? "/skilled-member"
+        : "/skilled-member/profile";
+      navigate(target);
     }
   }, [justLoggedIn, profileData, navigate]);
 
@@ -100,17 +93,14 @@ export default function SkilledMemberLogin() {
   };
 
   const loginInProgress = loginMutation.isPending;
-  const redirectingInProgress = redirecting || (justLoggedIn && profileLoading);
+  // const redirectingInProgress = redirecting || (justLoggedIn && profileLoading);
 
   // Full-screen loader while redirecting after login
-  if (redirectingInProgress) {
+  if (justLoggedIn && profileLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background">
         <Loader />
-        <p className="mt-4 text-lg font-medium">
-          {redirectTarget === "dashboard" && "Redirecting to Dashboard..."}
-          {redirectTarget === "profile" && "Redirecting to Profile..."}
-        </p>
+        <p className="mt-4 text-lg font-medium">Loading...</p>
       </div>
     );
   }

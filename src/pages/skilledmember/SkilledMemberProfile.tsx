@@ -150,8 +150,8 @@ export default function SkilledMemberProfile() {
         ? Number(yearsOfExperience)
         : undefined,
       description: formData.bio,
-      tools: formData.tools.length ? formData.tools : defaultTools,
-      skills: formData.skills.length ? formData.skills : defaultSkills,
+      tools: formData.tools, // send empty array if user unselected all
+      skills: formData.skills,
     };
 
     try {
