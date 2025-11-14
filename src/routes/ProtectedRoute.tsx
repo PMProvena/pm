@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import type { JSX } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   children: JSX.Element;
@@ -7,23 +8,27 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  // Retrieve stored user details and token
-  const storedUser = localStorage.getItem("userDetails");
-  const token = localStorage.getItem("pmUserToken");
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const role = user?.data?.role;
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userDetails");
+    const storedToken = localStorage.getItem("pmUserToken");
 
-  // Not logged in → go to home
-  if (!token || !user) {
-    return <Navigate to="/" replace />;
-  }
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    setUserRole(user?.data?.role || null);
+    setToken(storedToken || null);
 
-  // Logged in but role not allowed → go to home
-  if (!allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
-  }
+    setIsLoading(false);
+  }, []);
 
-  // Allowed → render the protected content
+  if (isLoading) return null; // or a spinner
+
+  if (!token || !userRole)
+    return <Navigate to="/skilled-member/login" replace />;
+  if (!allowedRoles.includes(userRole))
+    return <Navigate to="/skilled-member/login" replace />;
+
   return children;
 }

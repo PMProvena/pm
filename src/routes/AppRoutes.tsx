@@ -23,6 +23,7 @@ import { RewardsSystem } from "@/pages/superadmin/components/RewardsSystem";
 import { TeamOversight } from "@/pages/superadmin/components/TeamOversight";
 import { UserManagement } from "@/pages/superadmin/components/UserManagement";
 import SkilledMemberProfile from "@/pages/skilledmember/SkilledMemberProfile";
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -78,21 +79,22 @@ export default function AppRoutes() {
         }
       />
 
+      {/* Skilled Member Routes */}
       <Route path="/skilled-member/login" element={<SkilledMemberLogin />} />
       <Route
         path="/skilled-member"
         element={
-          // <ProtectedRoute allowedRoles={["skilled-member"]}>
-          <SkilledMemberDashboard />
-          // </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["skilled-member"]}>
+            <SkilledMemberDashboard />
+          </ProtectedRoute>
         }
       />
       <Route
         path="/skilled-member/profile"
         element={
-          // <ProtectedRoute allowedRoles={["skilled-member"]}>
-          <SkilledMemberProfile />
-          // </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["skilled-member"]}>
+            <SkilledMemberProfile />
+          </ProtectedRoute>
         }
       />
 

@@ -14,14 +14,15 @@ export default function SkilledMemberLogin() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
 
-  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
-  const userId = user?.data?.userId;
-
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   // Fetch profile once we know the userId
+  const user = JSON.parse(localStorage?.getItem("userDetails") || "null");
+  const userId = user?.data?.userId;
+
   const { data: profileData, isLoading: profileLoading } = useUserProfile(
-    justLoggedIn ? userId : undefined
+    justLoggedIn ? userId : undefined,
+    { enabled: justLoggedIn }
   );
 
   const [showPassword, setShowPassword] = useState(false);
@@ -72,37 +73,27 @@ export default function SkilledMemberLogin() {
     loginMutation.mutate(
       { email: formData.email, password: formData.password },
       {
-        onSuccess: () => {
-          const userDetails = JSON.parse(
-            localStorage.getItem("userDetails") || "null"
-          );
+        onSuccess: (data) => {
+          let role = data?.data?.role;
 
-          let role = userDetails?.data?.role;
-
-          // If role is missing entirely
-          if (!role) {
-            toast.error(
-              "Unable to determine your role. Please contact support."
-            );
-            return;
-          }
-
-          // If role is NOT admin, pm, or mentor → consider them skilled-member
           if (!["admin", "pm", "mentor"].includes(role)) {
             role = "skilled-member";
           }
 
-          // Reject admin, pm, mentor
-          if (role !== "skilled-member") {
-            toast.error("You are not a Skilled Member");
-            return;
-          }
+          // Save the modified userDetails with role
+          const updatedUserDetails = { ...data, data: { ...data.data, role } };
+          localStorage.setItem(
+            "userDetails",
+            JSON.stringify(updatedUserDetails)
+          );
 
-          // Allow skilled member to proceed
-          toast.success("Logged in successfully!");
-          setJustLoggedIn(true);
-          // navigate("/skilled-member/profile");
-          // setUserId(userDetails.data.userId);
+          if (role === "skilled-member") {
+            localStorage.setItem("pmUserToken", data.data.token);
+            toast.success("Logged in successfully!");
+            setJustLoggedIn(true);
+          } else {
+            toast.error("You are not a Skilled Member");
+          }
         },
       }
     );

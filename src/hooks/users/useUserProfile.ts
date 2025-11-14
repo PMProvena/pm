@@ -21,20 +21,27 @@ interface UpdateProfileResponse {
   data?: any;
 }
 
-// --- Hook to fetch user profile ---
-export const useUserProfile = (userId: number) => {
+interface UseUserProfileOptions {
+  enabled?: boolean;
+}
+
+export const useUserProfile = (
+  userId: number | undefined,
+  options?: UseUserProfileOptions
+) => {
   return useQuery({
     queryKey: ["profile", userId],
     queryFn: async () => {
+      if (!userId) throw new Error("No userId provided");
       const { data } = await api.get(`/users/${userId}`);
       return data;
     },
+    enabled: !!userId && options?.enabled, // only fetch if userId exists and enabled is true
     retry: 0,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
   });
 };
-
 // --- Hook to update user profile ---
 export const useUpdateUserProfile = () => {
   const queryClient = useQueryClient();
