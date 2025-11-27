@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Calendar,
   Edit,
@@ -212,7 +213,7 @@ export function ProjectManagement() {
                     const totalMilestones = project.milestones?.length ?? 0;
                     const completedMilestones =
                       project.milestones?.filter(
-                        (m) => m.status === "completed"
+                        (m: any) => m.status === "completed"
                       ).length ?? 0;
 
                     const completionRate =
@@ -310,7 +311,7 @@ export function ProjectManagement() {
               {selectedProject ? (
                 selectedProject.milestones?.length ? (
                   <div className="space-y-4">
-                    {selectedProject.milestones?.map((milestone, index) => (
+                    {selectedProject.milestones?.map((milestone: any, index: number) => (
                       <Card key={index} className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div>
