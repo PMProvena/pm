@@ -533,7 +533,7 @@ export function LandingPage({ onAuthClick, waitlist }: LandingPageProps) {
         transition={{ duration: 0.6 }}
       >
         <div className="container mx-auto">
-          <div className="flex flex-col gap-2 lg:flex-row  justify-between items-center">
+          <div className="flex flex-col gap-2 lg:flex-row items-start justify-between lg:items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="flex items-center space-x-2">
                 <Link to={"/"}>
