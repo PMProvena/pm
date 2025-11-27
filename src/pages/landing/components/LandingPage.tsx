@@ -526,14 +526,14 @@ export function LandingPage({ onAuthClick, waitlist }: LandingPageProps) {
       {/* Footer */}
 
       <motion.footer
-        className="py-10 px-4 border-t"
+        className="py-6 lg:py-10 px-4 border-t"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
       >
         <div className="container mx-auto">
-          <div className="flex  justify-between items-center">
+          <div className="flex flex-col gap-2 lg:flex-row  justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="flex items-center space-x-2">
                 <Link to={"/"}>
