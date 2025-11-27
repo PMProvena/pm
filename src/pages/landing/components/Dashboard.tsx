@@ -3,7 +3,6 @@ import {
   Award,
   Bell,
   BookOpen,
-  Calendar,
   MessageSquare,
   Plus,
   Settings,
@@ -37,6 +36,7 @@ export function Dashboard() {
   const nav = useNavigate();
 
   const { data, isPending, isError, refetch: refetchData } = useGetDashboard();
+  console.log("data", data);
 
   // const { data: MyProjects } = useGetMyProjects();
   // console.log("MyProjects", MyProjects);
@@ -44,16 +44,23 @@ export function Dashboard() {
   const myProjectsArray = data?.data?.myProjects
     ? Object.values(data.data.myProjects)
     : [];
+  console.log("myProjectsArray", myProjectsArray);
 
-  const currentProject = myProjectsArray[0] ?? null;
+  const currentProject = myProjectsArray[1] ?? null;
+
+  const completedMilestones = currentProject?.milestonesCompleted ?? 0;
+
+  const totalMilestones =
+    typeof currentProject?.milestones === "number"
+      ? currentProject.milestones
+      : Array.isArray(currentProject?.milestones)
+      ? currentProject.milestones.length
+      : 0;
 
   console.log("Dashboard data:", data);
   console.log("currentProject", currentProject);
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [projectPhase, setProjectPhase] = useState<
-    "team-formation" | "active" | "completed"
-  >("team-formation");
 
   // Replace your old mock stats with this
   const stats = {
@@ -105,13 +112,13 @@ export function Dashboard() {
 
   useEffect(() => {
     if (activeTab === "project" && currentProject) {
-      if (projectPhase === "team-formation") {
-        nav("/build-your-team", { state: { project: currentProject } });
-      } else if (projectPhase === "active") {
+      if (currentProject.assignedUsers?.length) {
         nav("/project-phase", { state: { project: currentProject } });
+      } else {
+        nav("/build-your-team", { state: { project: currentProject } });
       }
     }
-  }, [activeTab, projectPhase, currentProject, nav]);
+  }, [activeTab, currentProject, nav]);
 
   if (isError) return <Error refetchData={refetchData} />;
 
@@ -302,7 +309,7 @@ export function Dashboard() {
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="project">Current Project</TabsTrigger>
-                  <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                  <TabsTrigger value="projects">Projects</TabsTrigger>
                   <TabsTrigger value="teamMembers">Team Members</TabsTrigger>
                 </TabsList>
 
@@ -371,7 +378,7 @@ export function Dashboard() {
                       <CardContent className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="text-lg mb-1">
+                            <h3 className="text-lg mb-1 capitalize">
                               {currentProject.title}
                             </h3>
                             <p className="text-sm text-muted-foreground">
@@ -383,19 +390,21 @@ export function Dashboard() {
                           </div>
                           <Button
                             onClick={() => {
-                              if (projectPhase === "team-formation") {
-                                nav("/build-your-team", {
+                              if (currentProject?.assignedUsers?.length) {
+                                nav("/project-phase", {
                                   state: { project: currentProject },
                                 });
                               } else {
-                                nav("/project-phase", {
+                                nav("/build-your-team", {
                                   state: { project: currentProject },
                                 });
                               }
                             }}
                             className="cursor-pointer"
                           >
-                            View Project
+                            {currentProject?.assignedUsers?.length
+                              ? "View Project"
+                              : "Build Your Team"}
                           </Button>
                         </div>
 
@@ -403,19 +412,15 @@ export function Dashboard() {
                           <div className="flex justify-between text-sm">
                             <span>Progress</span>
                             <span>
-                              {stats.completedMilestones}/
-                              {stats.totalMilestones} milestones
+                              {completedMilestones}/{totalMilestones}
                             </span>
                           </div>
                           <Progress
                             value={
-                              stats.totalMilestones && stats.totalMilestones > 0
-                                ? (stats.completedMilestones /
-                                    stats.totalMilestones) *
-                                  100
+                              totalMilestones > 0
+                                ? (completedMilestones / totalMilestones) * 100
                                 : 0
                             }
-                            className="h-2"
                           />
                         </div>
                       </CardContent>
@@ -517,19 +522,30 @@ export function Dashboard() {
 
                 {/* Current Project Tab*/}
                 <TabsContent value="project" className="space-y-6">
-                  {currentProject ? (
-                    // projectPhase === "team-formation" ? (
-                    //   <TeamFormation
-                    //     project={currentProject}
-                    //     onTeamComplete={() => setProjectPhase("active")}
-                    //     onBack={() => setActiveTab("overview")}
-                    //   />
-                    // ) : projectPhase === "active" ? (
-                    //   <ProjectDashboard
-                    //     project={currentProject}
-                    //     onBack={() => setActiveTab("overview")}
-                    //   />
-                    // ) : (
+                  {!currentProject && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>No Active Project</CardTitle>
+                        <CardDescription>
+                          Start your first project to begin your PM journey.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-center my-12 space-y-2">
+                        <Target className="h-12 w-12 text-muted-foreground mx-auto" />
+                        <p className="text-muted-foreground">
+                          You currently have no active projects.
+                        </p>
+                        <Button
+                          onClick={() => nav("/projects")}
+                          className="cursor-pointer mt-2"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Browse Projects
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {/* {currentProject ? (
                     <Card>
                       <CardHeader>
                         <CardTitle>Project Workspace</CardTitle>
@@ -594,39 +610,90 @@ export function Dashboard() {
                         </Button>
                       </CardContent>
                     </Card>
-                  )}
+                  )} */}
                 </TabsContent>
 
-                {/* Portfolio  Tab*/}
-                <TabsContent value="portfolio" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Portfolio</CardTitle>
-                      <CardDescription>
-                        Your completed projects and case studies
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-12 space-y-2">
-                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
+                {/* Projects Tab */}
+                <TabsContent value="projects" className="space-y-6">
+                  {myProjectsArray.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6">
+                      {myProjectsArray.map((project) => {
+                        const completedMilestones =
+                          project.milestonesCompleted ?? 0;
 
-                        <h3 className="text-lg font-medium">
-                          No Portfolio Yet
-                        </h3>
+                        const totalMilestones =
+                          typeof project.milestones === "number"
+                            ? project.milestones
+                            : Array.isArray(project.milestones)
+                            ? project.milestones.length
+                            : 0;
+
+                        const progress =
+                          totalMilestones > 0
+                            ? (completedMilestones / totalMilestones) * 100
+                            : 0;
+
+                        return (
+                          <Card key={project._id}>
+                            <CardHeader>
+                              <CardTitle className="capitalize">{project.title}</CardTitle>
+                              <CardDescription>
+                                Your project progress
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="text-lg mb-1 capitalize">
+                                    {project.title}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {project.industry}
+                                  </p>
+                                  <Badge variant="outline" className="mt-2">
+                                    {project.difficulty}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Progress</span>
+                                  <span>
+                                    {completedMilestones}/{totalMilestones}{" "}
+                                    milestones
+                                  </span>
+                                </div>
+                               <Progress value={progress} className="h-2" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>No Projects Yet</CardTitle>
+                        <CardDescription>
+                          You currently have no projects assigned or created.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-center py-12 space-y-2">
+                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
                         <p className="text-muted-foreground">
-                          Complete your first project to generate your portfolio
-                          case study
+                          Start your first project to see it listed here.
                         </p>
                         <Button
                           variant="outline"
                           className="mt-2 cursor-pointer"
                           onClick={() => nav("/projects")}
                         >
-                          Start Your First Project
+                          Browse Projects
                         </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
 
                 {/* Team Members Tab */}

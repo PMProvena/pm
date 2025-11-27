@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { UserType } from "./user";
 
 export interface Milestone {
@@ -11,6 +12,8 @@ export interface Milestone {
 }
 
 export interface Project {
+  assignedUsers: any;
+  milestonesCompleted: number;
   _id: string;
   title: string;
   industry: string;
@@ -23,9 +26,9 @@ export interface Project {
   price: number;
   status: "open" | "in-progress" | "completed";
   owner?: string | null;
-  completedMilestones?: Milestone[]; // ✅ This must be an array, not a number
-  milestones?: Milestone[]; // ✅ This must be an array, not a number
-  milestonesCount?: number; // optional, can stay for display purposes
+  completedMilestones?: Milestone[]; 
+  milestones?: any; 
+  milestonesCount?: number; 
   createdAt: string;
   updatedAt: string;
 }

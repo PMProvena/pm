@@ -1,4 +1,3 @@
-import { Star, Target, Trophy, Users } from "lucide-react";
 import img1 from "@/assets/img-1.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
@@ -11,76 +10,24 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { features, industries } from "@/lib/contants";
 
 interface LandingPageProps {
   onAuthClick: (type: "login" | "signup") => void;
+  waitlist?: boolean;
 }
 
-export function LandingPage({ onAuthClick }: LandingPageProps) {
-  const features = [
-    {
-      icon: <Target className="h-6 w-6" />,
-      title: "Real-World Projects",
-      description:
-        "Work on guided projects across various industries with structured milestones",
-    },
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: "Cross-Functional Teams",
-      description:
-        "Collaborate with UI/UX designers, developers, and other specialists",
-    },
-    {
-      icon: <Star className="h-6 w-6" />,
-      title: "Expert Mentorship",
-      description:
-        "Get feedback from experienced PMs throughout your project journey",
-    },
-    {
-      icon: <Trophy className="h-6 w-6" />,
-      title: "Portfolio & Certification",
-      description:
-        "Build case studies and earn certificates to showcase to recruiters",
-    },
-  ];
-
-  const industries = [
-    "E-commerce",
-    "FinTech",
-    "HealthTech",
-    "EdTech",
-    "SaaS",
-    "Mobile Apps",
-  ];
-
-  // const testimonials = [
-  //   {
-  //     name: "Sarah Chen",
-  //     role: "Product Manager at TechCorp",
-  //     content:
-  //       "PM Experience gave me the real-world experience I needed to land my first PM role. The mentorship was invaluable!",
-  //     rating: 5,
-  //   },
-  //   {
-  //     name: "Marcus Rodriguez",
-  //     role: "Associate PM at StartupXYZ",
-  //     content:
-  //       "The project structure and team collaboration aspect perfectly mimicked what I experience in my current role.",
-  //     rating: 5,
-  //   },
-  //   {
-  //     name: "Emily Johnson",
-  //     role: "Junior PM at BigTech",
-  //     content:
-  //       "Building a portfolio with real case studies made all the difference in my interviews.",
-  //     rating: 5,
-  //   },
-  // ];
-
+export function LandingPage({ onAuthClick, waitlist }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b">
+      <motion.header
+        className="border-b fixed top-0 left-0 w-full z-50 bg-background"
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* <div className="flex items-center space-x-2"> */}
@@ -96,68 +43,164 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => onAuthClick("login")}
-                className="cursor-pointer"
-              >
-                Login
-              </Button>
-              <Button
-                onClick={() => onAuthClick("signup")}
-                className="cursor-pointer"
-              >
-                Get Started
-              </Button>
+              {!waitlist && (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => onAuthClick("login")}
+                    className="cursor-pointer"
+                  >
+                    Login
+                  </Button>
+
+                  <Button
+                    onClick={() => onAuthClick("signup")}
+                    className="cursor-pointer"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
+
+              {waitlist && (
+                <Button
+                  className="cursor-pointer"
+                  onClick={() =>
+                    window.open("https://forms.gle/ovbb596Wzu9Mkgrt9", "_blank")
+                  }
+                >
+                  Join Waitlist
+                </Button>
+              )}
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 mt-10 lg:mt-20">
         <div className="container mx-auto text-center">
-          <Badge className="mb-4" variant="secondary">
-            Bridge the Experience Gap
-          </Badge>
-          <h1 className="text-4xl md:text-6xl mb-6 max-w-4xl mx-auto text-primary">
-            Land Your Dream PM Job with Real-World Experience
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join cross-functional teams, work on industry projects, get expert
-            mentorship, and build a portfolio that gets you hired.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button
-              size="lg"
-              onClick={() => onAuthClick("signup")}
-              className="cursor-pointer"
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.2,
+                },
+              },
+            }}
+          >
+            <motion.div
+              variants={{
+                hidden: { y: -20, opacity: 0 },
+                visible: { y: 0, opacity: 1, transition: { duration: 0.6 } },
+              }}
             >
-              Start Your PM Journey
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="cursor-pointer"
-              onClick={() => onAuthClick("signup")}
+              <Badge className="mb-4" variant="secondary">
+                Bridge the Experience Gap
+              </Badge>
+            </motion.div>
+
+            <motion.h1
+              className="text-4xl md:text-6xl mb-6 max-w-4xl mx-auto text-primary"
+              variants={{
+                hidden: { y: 40, opacity: 0 },
+                visible: { y: 0, opacity: 1, transition: { duration: 0.8 } },
+              }}
             >
-              Kickstart your PM career today.
-            </Button>
-          </div>
-          <div className="relative max-w-4xl mx-auto">
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1739285452621-59d92842fcc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB0ZWFtJTIwY29sbGFib3JhdGlvbiUyMG1lZXRpbmd8ZW58MXx8fHwxNzU3Njg1MzMyfDA&ixlib=rb-4.1.0&q=80&w=1080"
-              alt="Professional team collaboration"
-              className="rounded-lg shadow-2xl w-full h-auto"
-            />
-          </div>
+              Land Your Dream PM Job with Real-World Experience
+            </motion.h1>
+
+            <motion.p
+              className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
+              variants={{
+                hidden: { y: 20, opacity: 0 },
+                visible: {
+                  y: 0,
+                  opacity: 1,
+                  transition: { duration: 0.8, delay: 0.2 },
+                },
+              }}
+            >
+              Join cross-functional teams, work on industry projects, get expert
+              mentorship, and build a portfolio that gets you hired.
+            </motion.p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { duration: 0.8, delay: 0.4 },
+                },
+              }}
+            >
+              {waitlist ? (
+                <Button
+                  size="lg"
+                  onClick={() =>
+                    window.open("https://forms.gle/ovbb596Wzu9Mkgrt9", "_blank")
+                  }
+                  className="cursor-pointer w-fit self-center"
+                >
+                  Join Waitlist
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    size="lg"
+                    onClick={() => onAuthClick("signup")}
+                    className="cursor-pointer"
+                  >
+                    Start Your PM Journey
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => onAuthClick("signup")}
+                  >
+                    Kickstart your PM career today.
+                  </Button>
+                </>
+              )}
+            </motion.div>
+
+            <motion.div
+              className="relative max-w-4xl mx-auto"
+              variants={{
+                hidden: { scale: 0.95, opacity: 0 },
+                visible: {
+                  scale: 1,
+                  opacity: 1,
+                  transition: { duration: 0.8, delay: 0.6 },
+                },
+              }}
+            >
+              <ImageWithFallback
+                src="https://images.unsplash.com/photo-1739285452621-59d92842fcc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB0ZWFtJTIwY29sbGFib3JhdGlvbiUyMG1lZXRpbmd8ZW58MXx8fHwxNzU3Njg1MzMyfDA&ixlib=rb-4.1.0&q=80&w=1080"
+                alt="Professional team collaboration"
+                className="rounded-lg shadow-2xl w-full h-auto"
+              />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Features Section */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
+          {/* Header */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl mb-4">
               Everything You Need to Succeed
             </h2>
@@ -165,29 +208,55 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               Our platform provides structured learning experiences that mirror
               real PM roles
             </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          </motion.div>
+
+          {/* Feature Cards */}
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.2 } }, // stagger card animations
+            }}
+          >
             {features.map((feature, index) => (
-              <Card key={index} className="text-center">
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-                    <div className="text-primary">{feature.icon}</div>
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+                }}
+              >
+                <Card className="text-center">
+                  <CardHeader>
+                    <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
+                      <div className="text-primary">{feature.icon}</div>
+                    </div>
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>{feature.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Industries Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
+          {/* Header */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl mb-4">
               Work Across Multiple Industries
             </h2>
@@ -195,38 +264,79 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               Choose from a variety of industry-specific projects to build
               diverse experience
             </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          </motion.div>
+
+          {/* Industry Badges */}
+          <motion.div
+            className="flex flex-wrap justify-center gap-4 mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.1 } },
+            }}
+          >
             {industries.map((industry, index) => (
-              <Badge
+              <motion.div
                 key={index}
-                variant="outline"
-                className="px-4 py-2 text-sm"
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                }}
               >
-                {industry}
-              </Badge>
+                <Badge variant="outline" className="px-4 py-2 text-sm">
+                  {industry}
+                </Badge>
+              </motion.div>
             ))}
-          </div>
-          <div className="relative max-w-3xl mx-auto">
+          </motion.div>
+
+          {/* Image */}
+          <motion.div
+            className="relative max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
             <ImageWithFallback
               src={img1}
               alt="Product management dashboard"
               className="rounded-lg shadow-xl w-full h-auto"
             />
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* How It Works */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
+          {/* Header */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }} // triggers when 30% visible
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl mb-4">How It Works</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               A simple 4-step process to gain real Provena
             </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          </motion.div>
+
+          {/* Steps */}
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }} // important
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.2 } },
+            }}
+          >
             {[
               {
                 step: "1",
@@ -253,7 +363,14 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
                   "Generate case studies and earn completion certificates",
               },
             ].map((item, index) => (
-              <div key={index} className="text-center">
+              <motion.div
+                key={index}
+                className="text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+                }}
+              >
                 <div className="bg-primary text-primary-foreground rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-lg">
                   {item.step}
                 </div>
@@ -261,9 +378,9 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
                 <p className="text-muted-foreground text-sm">
                   {item.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -311,40 +428,115 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl mb-4">Ready to excel as a PM?</h2>
-          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join hundreds of aspiring PMs who have successfully transitioned
-            into product management roles
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="cursor-pointer"
-              onClick={() => onAuthClick("signup")}
-            >
-              Get Started Now
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => onAuthClick("signup")}
-              className="cursor-pointer bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-            >
-              Kickstart your PM career today.
-            </Button>
-          </div>
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl mb-4">
+              Ready to excel as a PM?
+            </h2>
+            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              Join hundreds of aspiring PMs who have successfully transitioned
+              into product management roles
+            </p>
+          </motion.div>
+
+          {/* Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.2, // buttons appear one after another
+                },
+              },
+            }}
+          >
+            {waitlist ? (
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+                }}
+              >
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="cursor-pointer"
+                  onClick={() =>
+                    window.open("https://forms.gle/ovbb596Wzu9Mkgrt9", "_blank")
+                  }
+                >
+                  Join Waitlist
+                </Button>
+              </motion.div>
+            ) : (
+              <>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.5 },
+                    },
+                  }}
+                >
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => onAuthClick("signup")}
+                  >
+                    Get Started Now
+                  </Button>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.5 },
+                    },
+                  }}
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => onAuthClick("signup")}
+                    className="cursor-pointer bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                  >
+                    Kickstart your PM career today.
+                  </Button>
+                </motion.div>
+              </>
+            )}
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t">
+
+      <motion.footer
+        className="py-10 px-4 border-t"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex  justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="flex items-center space-x-2">
                 <Link to={"/"}>
-                  {" "}
                   <img
                     src="/pngs/logotwo.png"
                     alt="logo"
@@ -354,11 +546,11 @@ export function LandingPage({ onAuthClick }: LandingPageProps) {
               </div>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2025 Provena. All rights reserved.
+              © {new Date().getFullYear()} Provena. All rights reserved.
             </div>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

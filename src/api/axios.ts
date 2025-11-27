@@ -29,24 +29,24 @@ api.interceptors.request.use(
 );
 
 // ✅ Response interceptor — handle expired/invalid token
-// api.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     const status = error?.response?.status;
-//     const message =
-//       error?.response?.data?.message || error?.response?.data?.error;
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const message =
+      error?.response?.data?.message || error?.response?.data?.error;
 
-//     // If unauthorized (token invalid or expired)
-//     if (status === 401 || message?.toLowerCase().includes("token")) {
-//       if (typeof window !== "undefined") {
-//         localStorage.removeItem("userDetails");
-//         // Optional: clear other app states
-//         window.location.href = "/login"; // redirect to login page
-//       }
-//     }
+    // If unauthorized (token invalid or expired)
+    if (status === 401 || message?.toLowerCase().includes("token")) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("userDetails");
+        // Optional: clear other app states
+        window.location.href = "/login"; // redirect to login page
+      }
+    }
 
-//     return Promise.reject(error);
-//   }
-// );
+    return Promise.reject(error);
+  }
+);
 
 export default api;

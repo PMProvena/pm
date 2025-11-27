@@ -12,6 +12,8 @@ interface PayButtonProps {
   projectId: string;
   userId: string;
   children?: ReactNode;
+
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const PayButton: React.FC<PayButtonProps> = ({
@@ -20,6 +22,8 @@ export const PayButton: React.FC<PayButtonProps> = ({
   projectId,
   userId,
   children,
+
+  setOpen,
 }) => {
   const navigate = useNavigate();
   const mutation = usePayForProject();
@@ -48,6 +52,8 @@ export const PayButton: React.FC<PayButtonProps> = ({
   const initializePayment = usePaystackPayment(paystackConfig);
 
   const handlePay = () => {
+    setOpen?.(false);
+
     initializePayment({
       onSuccess: async (response) => {
         try {
@@ -63,6 +69,7 @@ export const PayButton: React.FC<PayButtonProps> = ({
           queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 
           toast.success("Payment successful!");
+          
           navigate("/dashboard");
         } catch (err: any) {
           console.log(err);

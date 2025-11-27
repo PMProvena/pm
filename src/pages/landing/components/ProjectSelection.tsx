@@ -1,5 +1,4 @@
 import type { Project } from "@/api/interfaces/projects";
-import { PayButton } from "@/components/PayButton";
 import { useGetProjects } from "@/hooks/projects/useGetProjects";
 import {
   Clock,
@@ -16,6 +15,7 @@ import { useMemo, useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import Error from "./error/Error";
 import ProjectsSkeletonLoader from "./loader/ProjectsSkeletonLoader";
+import { PaymentOptions } from "./PaymentOptions";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -145,7 +145,7 @@ export function ProjectSelection() {
                       {getIcon(selectedProject.industry)}
                     </div>
                     <div>
-                      <CardTitle className="text-2xl">
+                      <CardTitle className="text-2xl ">
                         {selectedProject.title}
                       </CardTitle>
                       <CardDescription className="text-lg">
@@ -188,7 +188,7 @@ export function ProjectSelection() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Progress</span>
                         <span className="text-sm">
-                          0/{selectedProject.milestones?.length ?? 0} milestones
+                          0/{selectedProject.milestones ?? 0} milestones
                         </span>
                       </div>
 
@@ -196,8 +196,7 @@ export function ProjectSelection() {
 
                       <p className="text-sm text-muted-foreground">
                         {selectedProject.duration} •{" "}
-                        {selectedProject.milestones?.length ?? 0} weekly
-                        milestones
+                        {selectedProject.milestones} weekly milestones
                       </p>
                     </div>
                   </div>
@@ -252,7 +251,7 @@ export function ProjectSelection() {
                       Milestones
                     </span>
                     <span className="text-sm">
-                      {selectedProject.milestones?.length ?? 0}
+                      {selectedProject.milestones ?? 0}
                     </span>
                   </div>
                 </CardContent>
@@ -270,22 +269,14 @@ export function ProjectSelection() {
                       </span>
                       <span className="text-muted-foreground">/ project</span>
                     </div>
-                    {/* <Button className="w-full cursor-pointer" size="lg">
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      Start This Project
-                    </Button> */}
-                    {/*  */}
+
                     {user && selectedProject && (
-                      <PayButton
+                      <PaymentOptions
                         email={user.data.email}
                         amount={selectedProject.price}
                         projectId={selectedProject._id}
                         userId={user.data.userId || user.data.id}
-                      >
-                        {/* <DollarSign className="h-4 w-4 mr-2" /> */}
-                        {/* ₦  */}
-                        Start This Project
-                      </PayButton>
+                      />
                     )}
 
                     <p className="text-xs text-muted-foreground">
@@ -357,8 +348,10 @@ export function ProjectSelection() {
                       </div>
                       <Badge variant="secondary">{project.industry}</Badge>
                     </div>
-                    <CardTitle className="text-lg">{project.title}</CardTitle>
-                    <CardDescription className="text-sm line-clamp-1">
+                    <CardTitle className="text-lg capitalize">
+                      {project.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm line-clamp-1 capitalize">
                       {project.description}
                     </CardDescription>
                   </CardHeader>
@@ -423,6 +416,15 @@ export function ProjectSelection() {
             <p className="text-muted-foreground">
               No projects found for the selected industry.
             </p>
+          </div>
+        )} */}
+        {/* 
+        {loadingPayment && (
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+            <Loader2 className="w-12 h-12 text-white" />
+            <span className="ml-4 text-white text-lg">
+              Processing Payment...
+            </span>
           </div>
         )} */}
       </div>

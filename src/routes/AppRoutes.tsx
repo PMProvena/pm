@@ -41,9 +41,9 @@ export default function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          // <ProtectedRoute allowedRoles={["pm"]}>
-          <Dashboard />
-          // </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["pm"]}>
+            <Dashboard />
+          </ProtectedRoute>
         }
       />
 
@@ -51,9 +51,9 @@ export default function AppRoutes() {
       <Route
         path="/admin/*"
         element={
-          // <ProtectedRoute allowedRoles={["admin"]}>
-          <SuperAdminDashboard />
-          // </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <SuperAdminDashboard />
+          </ProtectedRoute>
         }
       >
         <Route path="dashboard" element={<DashboardOverview />} />

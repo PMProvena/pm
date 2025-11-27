@@ -17,6 +17,20 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+            // ⭐ NEW: Skilled Member
+        skilled:
+          "border-transparent bg-blue-100 text-black dark:bg-blue-900/40 dark:text-blue-300",
+
+        // ⭐ PM
+        pm: "border-transparent bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+
+        // ⭐ Mentor
+        mentor:
+          "border-transparent bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+
+        // ⭐ Admin
+        admin:
+          "border-transparent bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
       },
     },
     defaultVariants: {

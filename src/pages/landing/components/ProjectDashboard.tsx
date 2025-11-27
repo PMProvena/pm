@@ -11,6 +11,7 @@ import {
   Target,
   Upload,
   Users,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -76,6 +77,17 @@ export function ProjectDashboard() {
   );
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadNotes, setUploadNotes] = useState("");
+
+  const [uploadOptionsOpen, setUploadOptionsOpen] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [uploadMethod, setUploadMethod] = useState<{
+    [key: string]: "pc" | "link" | null;
+  }>({});
+  const [uploadFiles, setUploadFiles] = useState<{
+    [key: string]: File | null;
+  }>({});
+  const [uploadLinks, setUploadLinks] = useState<{ [key: string]: string }>({});
 
   // Mock milestones data
   // const milestones: Milestone[] = [
@@ -243,7 +255,9 @@ export function ProjectDashboard() {
   const completedMilestones = milestones.filter(
     (m: any) => m.status === "approved"
   ).length;
-  const progressPercentage = (completedMilestones / milestones.length) * 100;
+
+  const progressPercentage =
+    milestones.length > 0 ? (completedMilestones / milestones.length) * 100 : 0;
 
   const handleMilestoneClick = (milestone: Milestone) => {
     setSelectedMilestone(milestone);
@@ -276,14 +290,16 @@ export function ProjectDashboard() {
           </Button>
 
           {isMyProjectsLoading ? (
-              <Loader /> 
+            <Loader />
           ) : (
             <>
               {/* Project Header */}
               <div className="mb-8">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-3xl mb-2">{project.title}</h1>
+                    <h1 className="text-3xl mb-2 capitalize">
+                      {project.title}
+                    </h1>
                     <p className="text-muted-foreground">
                       {project.industry} • {project.duration}
                     </p>
@@ -411,10 +427,10 @@ export function ProjectDashboard() {
                                     </div>
                                   </Badge>
                                 </div>
-                                <CardTitle className="text-lg">
+                                <CardTitle className="text-lg capitalize">
                                   {milestone.title}
                                 </CardTitle>
-                                <CardDescription className="mt-1">
+                                <CardDescription className="mt-1 capitalize">
                                   {milestone.description}
                                 </CardDescription>
                               </div>
@@ -436,7 +452,7 @@ export function ProjectDashboard() {
                                       <Badge
                                         key={index}
                                         variant="outline"
-                                        className="text-xs"
+                                        className="text-xs capitalize"
                                       >
                                         {deliverable}
                                       </Badge>
@@ -450,7 +466,7 @@ export function ProjectDashboard() {
                                   <div className="flex items-center space-x-2 mb-2">
                                     <MessageSquare className="h-4 w-4 text-green-600" />
                                     <span className="text-sm text-green-800">
-                                      Mentor Feedback
+                                      Mentor Feedback - ???
                                     </span>
                                     {milestone.mentorRating && (
                                       <div className="flex items-center space-x-1">
@@ -466,17 +482,23 @@ export function ProjectDashboard() {
                                     )}
                                   </div>
                                   <p className="text-sm text-green-700">
-                                    {milestone.feedback}
+                                    {milestone.feedback} abcdefghi
                                   </p>
                                 </div>
                               )}
 
-                              {milestone.status === "in-progress" && (
-                                <Button className="w-full">
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Upload Deliverables
-                                </Button>
-                              )}
+                              {/* {milestone.status === "in-progress" && ( */}
+                              <Button
+                                onClick={() => {
+                                  setSelectedMilestone(milestone); // set the current milestone
+                                  setShowUploadDialog(true); // open the dialog
+                                }}
+                                className="w-full cursor-pointer"
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                Upload Deliverables
+                              </Button>
+                              {/* )} */}
                             </div>
                           </CardContent>
                         </Card>
@@ -513,7 +535,10 @@ export function ProjectDashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-3">
-                                <Button variant="outline" className="w-full">
+                                <Button
+                                  variant="outline"
+                                  className="w-full cursor-pointer"
+                                >
                                   <MessageSquare className="h-4 w-4 mr-2" />
                                   Message
                                 </Button>
@@ -570,11 +595,11 @@ export function ProjectDashboard() {
                         </p>
 
                         <div className="grid grid-cols-2 gap-4">
-                          <Button>
+                          <Button className="cursor-pointer">
                             <MessageSquare className="h-4 w-4 mr-2" />
                             Send Message
                           </Button>
-                          <Button variant="outline">
+                          <Button variant="outline" className="cursor-pointer">
                             <Calendar className="h-4 w-4 mr-2" />
                             Schedule 1:1
                           </Button>
@@ -617,7 +642,11 @@ export function ProjectDashboard() {
                               className="flex items-center justify-between p-2 border rounded"
                             >
                               <span className="text-sm">{template}</span>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="cursor-pointer"
+                              >
                                 <Download className="h-4 w-4" />
                               </Button>
                             </div>
@@ -644,7 +673,11 @@ export function ProjectDashboard() {
                               className="flex items-center justify-between p-2 border rounded"
                             >
                               <span className="text-sm">{resource}</span>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="cursor-pointer"
+                              >
                                 <FileText className="h-4 w-4" />
                               </Button>
                             </div>
@@ -664,26 +697,135 @@ export function ProjectDashboard() {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle>Upload Deliverables</DialogTitle>
             <DialogDescription>
               Upload your completed deliverables for {selectedMilestone?.title}
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
             <div>
               <Label>Deliverables</Label>
               {selectedMilestone?.deliverables.map((deliverable, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border rounded mt-2"
+                  className="flex flex-col gap-2 p-3 border rounded mt-2"
                 >
-                  <span className="text-sm">{deliverable}</span>
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">{deliverable}</span>
+
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer border-primary text-primary"
+                      onClick={() =>
+                        setUploadOptionsOpen((prev) => ({
+                          ...prev,
+                          [index]: !prev[index],
+                        }))
+                      }
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload
+                    </Button>
+                  </div>
+
+                  {uploadOptionsOpen[index] && (
+                    <div className="flex flex-col gap-2 mt-2 p-2 border rounded bg-gray-50">
+                      {/* Upload from PC */}
+                      <Button
+                        variant="outline"
+                        className="w-full cursor-pointer border-primary text-primary"
+                        onClick={() =>
+                          setUploadMethod((prev) => ({
+                            ...prev,
+                            [index]: "pc",
+                          }))
+                        }
+                      >
+                        Upload from PC
+                      </Button>
+                      {uploadMethod[index] === "pc" && (
+                        <>
+                          <input
+                            type="file"
+                            className="hidden"
+                            id={`file-input-${index}`}
+                            accept="application/pdf"
+                            onChange={(e) =>
+                              setUploadFiles((prev) => ({
+                                ...prev,
+                                [index]: e.target.files
+                                  ? e.target.files[0]
+                                  : null,
+                              }))
+                            }
+                          />
+                          <label
+                            htmlFor={`file-input-${index}`}
+                            className="w-full mt-2 h-[100px] border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary hover:bg-gray-50 transition-all duration-200 relative"
+                          >
+                            {!uploadFiles[index] ? (
+                              <div className="flex flex-col items-center">
+                                <Upload className="h-6 w-6 text-gray-500 mb-2" />
+                                <span className="text-sm text-gray-600">
+                                  Click or drag to upload file (pdf only)
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2 w-full px-4">
+                                <span className="text-sm text-gray-700 truncate">
+                                  {uploadFiles[index].name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUploadFiles((prev) => ({
+                                      ...prev,
+                                      [index]: null,
+                                    }));
+                                  }}
+                                  className="ml-2  text-red-600 cursor-pointer"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            )}
+                          </label>
+                        </>
+                      )}
+
+                      {/* Upload via Link */}
+                      <Button
+                        variant="outline"
+                        className="w-full mt-2 cursor-pointer border-primary text-primary"
+                        onClick={() =>
+                          setUploadMethod((prev) => ({
+                            ...prev,
+                            [index]: "link",
+                          }))
+                        }
+                      >
+                        Upload via Link
+                      </Button>
+                      {uploadMethod[index] === "link" && (
+                        <input
+                          type="text"
+                          placeholder="Paste your link here"
+                          className="mt-2 w-full border rounded p-2 text-sm"
+                          value={uploadLinks[index] || ""}
+                          onChange={(e) =>
+                            setUploadLinks((prev) => ({
+                              ...prev,
+                              [index]: e.target.value,
+                            }))
+                          }
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -702,11 +844,15 @@ export function ProjectDashboard() {
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
+                className="cursor-pointer border-primary text-primary"
                 onClick={() => setShowUploadDialog(false)}
               >
                 Cancel
               </Button>
-              <Button onClick={handleUploadDeliverable}>
+              <Button
+                className="cursor-pointer border-primary text-white"
+                onClick={handleUploadDeliverable}
+              >
                 Submit for Review
               </Button>
             </div>

@@ -5,13 +5,18 @@ import toast from "react-hot-toast";
 
 // Define the payload type
 export interface UpdateProfilePayload {
-  first_name: string;
-  last_name: string;
-  experience_level: string;
+  first_name?: string;
+  last_name?: string;
+  experience_level?: string;
+  mentorship_title?: string;
   description?: string;
   years_of_experience?: number;
   skills?: string[];
   tools?: string[];
+  social_links?: {
+    platform: string;
+    url: string;
+  }[];
 }
 
 // Define the response type (adjust as per your API)
